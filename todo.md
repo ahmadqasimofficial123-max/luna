@@ -55,9 +55,9 @@
 - [x] Fix OAuth state cookie/callback compatibility without weakening CSRF protection
 - [x] Add regression coverage for OAuth state generation and callback validation
 - [x] Verify the complete login callback flow and save an updated checkpoint
-- [ ] Inspect GitHub export connection and target repository details
-- [ ] Confirm the latest Luna Social checkpoint is ready for export
-- [ ] Export or push Luna Social to the requested GitHub repository
-- [ ] Verify the resulting GitHub repository URL and branch state
-- [ ] Push the current Luna Social main branch to ahmadqasimofficial123-max/luna
-- [ ] Verify the remote branch commit and repository URL after pushing
+- [x] Inspect GitHub export connection and target repository details
+- [x] Confirm the latest Luna Social checkpoint is ready for export
+- [x] Export or push Luna Social to the requested GitHub repository
+- [x] Verify the resulting GitHub repository URL and branch state
+- [x] Push the current Luna Social main branch to ahmadqasimofficial123-max/luna
+- [x] Verify the remote branch commit and repository URL after pushing
