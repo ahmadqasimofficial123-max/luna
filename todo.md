@@ -47,4 +47,7 @@
 - [x] Replace Settings placeholder rows with persisted appearance, security, and message privacy controls; retain blocked/muted management as a follow-up surface
 - [x] Implement selectable conversation targeting with persisted send-message procedure; retain membership-based inbox expansion as a follow-up
 - [x] Expand workspace contract tests for feed, messages, notifications, reports, send-message, and settings update behavior
-- [ ] Deliver the final validated checkpoint version to the user
+- [x] Deliver the final validated checkpoint version to the user
+- [x] Fix login page button so it starts the Manus OAuth flow reliably
+- [x] Validate the login button handler through TypeScript checking and a public landing-route smoke test
+- [x] Validate the login flow in the browser and save an updated checkpoint
