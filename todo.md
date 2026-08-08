@@ -25,10 +25,14 @@
 - [x] Add Vitest success-path tests for social.createPost, social.like, social.save, and social.comment with mocked DB helpers or isolated procedure-level assertions
 - [x] Add Vitest success-path tests for social.createStory, social.stories, and social.report, including expected return behavior
 - [x] Add Vitest success-path tests for social.updateProfile, social.settings, and social.updateSettings, verifying valid inputs and persistence/update calls
-- [ ] Add real routes/layout separation for public landing vs authenticated app navigation
+- [x] Add real routes/layout separation for public landing vs authenticated app navigation
 - [ ] Wire feed comment/share/hide/mute to server procedures with optimistic updates and rollback/error states
 - [ ] Build functional profile, messages, notifications, explore/search, admin, and settings screens using real data and required actions
-- [ ] Complete composer with actual media upload/preview and submit all metadata fields
-- [ ] Implement full story viewer with reactions, replies, and visible expiry state
-- [ ] Complete post composer with actual media upload/preview and submit all metadata fields to the backend
+- [x] Complete composer with actual media upload/preview and submit all metadata fields
+- [x] Implement full story viewer with reactions, replies, and visible expiry state
+- [x] Complete post composer with actual media upload/preview and submit all metadata fields to the backend
 - [ ] Implement real story creation flow, reply/reaction mutations, and data-driven expiry/24-hour status presentation
+- [x] Protect the authenticated app route/layout and redirect unauthenticated users from the app shell to the public landing or login flow
+- [x] Render an actual in-composer media preview and submit hashtags/mentions plus available media metadata to the backend
+- [x] Implement a real story reply flow with input, mutation, and success/error handling instead of toast-only behavior
+- [ ] Add tests covering media upload integration, composer metadata submission, story reactions, and story replies

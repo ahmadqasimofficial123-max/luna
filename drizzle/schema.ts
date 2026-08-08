@@ -33,6 +33,8 @@ export const posts = mysqlTable("posts", {
   location: varchar("location", { length: 180 }),
   audience: mysqlEnum("audience", ["public", "followers", "private"]).default("public").notNull(),
   commentsEnabled: boolean("commentsEnabled").default(true).notNull(),
+  hashtags: text("hashtags"),
+  mentions: text("mentions"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (table) => ({ authorIdx: index("post_author_idx").on(table.authorId), createdIdx: index("post_created_idx").on(table.createdAt) }));
 
@@ -52,6 +54,7 @@ export const comments = mysqlTable("comments", { id: int("id").autoincrement().p
 
 export const stories = mysqlTable("stories", { id: int("id").autoincrement().primaryKey(), authorId: int("authorId").notNull(), mediaUrl: text("mediaUrl").notNull(), mediaType: mysqlEnum("mediaType", ["image", "video"]).notNull(), caption: text("caption"), expiresAt: timestamp("expiresAt").notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() });
 export const storyReactions = mysqlTable("storyReactions", { id: int("id").autoincrement().primaryKey(), storyId: int("storyId").notNull(), userId: int("userId").notNull(), reaction: varchar("reaction", { length: 16 }).notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() }, (table) => ({ uniqueReaction: uniqueIndex("unique_story_reaction").on(table.storyId, table.userId) }));
+export const storyReplies = mysqlTable("storyReplies", { id: int("id").autoincrement().primaryKey(), storyId: int("storyId").notNull(), authorId: int("authorId").notNull(), body: text("body").notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() });
 
 export const conversations = mysqlTable("conversations", { id: int("id").autoincrement().primaryKey(), createdAt: timestamp("createdAt").defaultNow().notNull(), updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull() });
 export const conversationMembers = mysqlTable("conversationMembers", { id: int("id").autoincrement().primaryKey(), conversationId: int("conversationId").notNull(), userId: int("userId").notNull(), lastReadAt: timestamp("lastReadAt") }, (table) => ({ uniqueMember: uniqueIndex("unique_conversation_member").on(table.conversationId, table.userId) }));
