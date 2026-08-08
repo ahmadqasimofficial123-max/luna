@@ -1,92 +1,34 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import { accountSettings, blocks, comments, follows, likes, messages, mutes, notifications, postMedia, posts, reports, saves, stories, users, type InsertUser } from "../drizzle/schema";
+import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
-
-// Lazily create the drizzle instance so local tooling can run without a DB.
-export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
-    try {
-      _db = drizzle(process.env.DATABASE_URL);
-    } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
-      _db = null;
-    }
-  }
-  return _db;
-}
+export async function getDb() { if (!_db && process.env.DATABASE_URL) { try { _db = drizzle(process.env.DATABASE_URL); } catch (error) { console.warn("[Database] Failed to connect:", error); } } return _db; }
 
 export async function upsertUser(user: InsertUser): Promise<void> {
-  if (!user.openId) {
-    throw new Error("User openId is required for upsert");
-  }
-
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot upsert user: database not available");
-    return;
-  }
-
-  try {
-    const values: InsertUser = {
-      openId: user.openId,
-    };
-    const updateSet: Record<string, unknown> = {};
-
-    const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
-
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
-
-    textFields.forEach(assignNullable);
-
-    if (user.lastSignedIn !== undefined) {
-      values.lastSignedIn = user.lastSignedIn;
-      updateSet.lastSignedIn = user.lastSignedIn;
-    }
-    if (user.role !== undefined) {
-      values.role = user.role;
-      updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
-    }
-
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
-
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
-  } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
-    throw error;
-  }
+  if (!user.openId) throw new Error("User openId is required for upsert");
+  const db = await getDb(); if (!db) return;
+  const values: InsertUser = { openId: user.openId, name: user.name, email: user.email, loginMethod: user.loginMethod, lastSignedIn: user.lastSignedIn ?? new Date(), role: user.role ?? (user.openId === ENV.ownerOpenId ? "admin" : "user") };
+  const updateSet: Record<string, unknown> = { lastSignedIn: values.lastSignedIn, name: values.name, email: values.email, loginMethod: values.loginMethod };
+  if (user.role) updateSet.role = user.role;
+  await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
 }
-
-export async function getUserByOpenId(openId: string) {
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
-    return undefined;
-  }
-
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-
-  return result.length > 0 ? result[0] : undefined;
-}
-
-// TODO: add feature queries here as your schema grows.
+export async function getUserByOpenId(openId: string) { const db = await getDb(); if (!db) return undefined; const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1); return result[0]; }
+export async function getFeed(limit = 20) { const db = await getDb(); if (!db) return []; return db.select({ post: posts, media: postMedia, author: users }).from(posts).leftJoin(postMedia, eq(postMedia.postId, posts.id)).innerJoin(users, eq(users.id, posts.authorId)).orderBy(desc(posts.createdAt)).limit(limit); }
+export async function getProfile(userId: number) { const db = await getDb(); if (!db) return undefined; const result = await db.select().from(users).where(eq(users.id, userId)).limit(1); return result[0]; }
+export async function updateProfile(userId: number, input: Partial<Pick<InsertUser, "username" | "displayName" | "bio" | "website" | "avatarUrl" | "isPrivate">>) { const db = await getDb(); if (!db) return; await db.update(users).set(input).where(eq(users.id, userId)); }
+export async function toggleLike(userId: number, postId: number) { const db = await getDb(); if (!db) return false; const existing = await db.select().from(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId))).limit(1); if (existing[0]) { await db.delete(likes).where(eq(likes.id, existing[0].id)); return false; } await db.insert(likes).values({ userId, postId }); return true; }
+export async function toggleSave(userId: number, postId: number) { const db = await getDb(); if (!db) return false; const existing = await db.select().from(saves).where(and(eq(saves.userId, userId), eq(saves.postId, postId))).limit(1); if (existing[0]) { await db.delete(saves).where(eq(saves.id, existing[0].id)); return false; } await db.insert(saves).values({ userId, postId }); return true; }
+export async function createPost(authorId: number, input: { caption?: string; location?: string; audience?: "public" | "followers" | "private"; commentsEnabled?: boolean; media: { url: string; mediaType: "image" | "video" }[] }) { const db = await getDb(); if (!db) return undefined; const result = await db.insert(posts).values({ authorId, caption: input.caption, location: input.location, audience: input.audience ?? "public", commentsEnabled: input.commentsEnabled ?? true }); const postId = Number(result[0].insertId); if (input.media.length) await db.insert(postMedia).values(input.media.map((item, index) => ({ postId, ...item, sortOrder: index }))); return postId; }
+export async function addComment(authorId: number, postId: number, body: string, parentId?: number) { const db = await getDb(); if (!db) return; await db.insert(comments).values({ authorId, postId, body, parentId }); }
+export async function followUser(followerId: number, followingId: number, isPrivate: boolean) { const db = await getDb(); if (!db) return "accepted" as const; await db.insert(follows).values({ followerId, followingId, status: isPrivate ? "pending" : "accepted" }).onDuplicateKeyUpdate({ set: { status: isPrivate ? "pending" : "accepted" } }); return isPrivate ? "pending" as const : "accepted" as const; }
+export async function toggleBlock(blockerId: number, blockedId: number) { const db = await getDb(); if (!db) return false; const existing = await db.select().from(blocks).where(and(eq(blocks.blockerId, blockerId), eq(blocks.blockedId, blockedId))).limit(1); if (existing[0]) { await db.delete(blocks).where(eq(blocks.id, existing[0].id)); return false; } await db.insert(blocks).values({ blockerId, blockedId }); return true; }
+export async function toggleMute(muterId: number, mutedId: number) { const db = await getDb(); if (!db) return false; const existing = await db.select().from(mutes).where(and(eq(mutes.muterId, muterId), eq(mutes.mutedId, mutedId))).limit(1); if (existing[0]) { await db.delete(mutes).where(eq(mutes.id, existing[0].id)); return false; } await db.insert(mutes).values({ muterId, mutedId }); return true; }
+export async function getSettings(userId: number) { const db = await getDb(); if (!db) return undefined; const existing = await db.select().from(accountSettings).where(eq(accountSettings.userId, userId)).limit(1); if (existing[0]) return existing[0]; await db.insert(accountSettings).values({ userId }); const created = await db.select().from(accountSettings).where(eq(accountSettings.userId, userId)).limit(1); return created[0]; }
+export async function updateSettings(userId: number, input: Partial<typeof accountSettings.$inferInsert>) { const db = await getDb(); if (!db) return; await db.insert(accountSettings).values({ userId, ...input }).onDuplicateKeyUpdate({ set: input }); }
+export async function listNotifications(userId: number) { const db = await getDb(); if (!db) return []; return db.select().from(notifications).where(eq(notifications.recipientId, userId)).orderBy(desc(notifications.createdAt)).limit(40); }
+export async function listMessages(userId: number) { const db = await getDb(); if (!db) return []; return db.select().from(messages).where(eq(messages.senderId, userId)).orderBy(desc(messages.createdAt)).limit(50); }
+export async function createReport(reporterId: number, input: { postId?: number; commentId?: number; reportedUserId?: number; reason: string; details?: string }) { const db = await getDb(); if (!db) return; await db.insert(reports).values({ reporterId, ...input }); }
+export async function createStory(authorId: number, mediaUrl: string, mediaType: "image" | "video", caption?: string) { const db = await getDb(); if (!db) return; await db.insert(stories).values({ authorId, mediaUrl, mediaType, caption, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) }); }
+export async function listStories() { const db = await getDb(); if (!db) return []; return db.select({ story: stories, author: users }).from(stories).innerJoin(users, eq(users.id, stories.authorId)).where(sql`${stories.expiresAt} > NOW()`).orderBy(desc(stories.createdAt)); }
