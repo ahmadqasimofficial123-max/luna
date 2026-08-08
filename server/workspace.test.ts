@@ -26,10 +26,24 @@ describe("workspace procedure contracts", () => {
     expect(Array.isArray(reports)).toBe(true);
   });
 
+  it("accepts conversation-scoped message queries and attachment payloads", async () => {
+    const caller = appRouter.createCaller(createContext());
+    const messages = await caller.social.messages({ conversationId: 1 });
+    expect(Array.isArray(messages)).toBe(true);
+    await expect(caller.social.sendMessage({ conversationId: 1, body: "", attachmentUrl: "https://cdn.example.com/photo.png", attachmentType: "image" })).rejects.toThrow("not a member");
+  });
+
+  it("rejects interaction mutations for conversations the user cannot access", async () => {
+    const caller = appRouter.createCaller(createContext());
+    const reaction = await caller.social.reactToMessage({ messageId: 1, reaction: "❤️" });
+    const read = await caller.social.markMessagesRead({ conversationId: 1 });
+    expect(reaction.success).toBe(false);
+    expect(read.success).toBe(false);
+  });
+
   it("accepts a persisted message payload and settings update contract", async () => {
     const caller = appRouter.createCaller(createContext());
-    const message = await caller.social.sendMessage({ conversationId: 1, body: "A signal from the workspace" });
-    expect(message.body).toBe("A signal from the workspace");
+    await expect(caller.social.sendMessage({ conversationId: 1, body: "A signal from the workspace" })).rejects.toThrow("not a member");
     const settings = await caller.social.updateSettings({ pushNotifications: false, allowMessages: "followers" });
     expect(settings).toBeUndefined();
   });

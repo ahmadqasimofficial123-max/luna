@@ -50,6 +50,13 @@
       "when": 1786209374111,
       "tag": "0006_faulty_zaran",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1786210610589,
+      "tag": "0007_boring_mariko_yashida",
+      "breakpoints": true
     }
   ]
 }
