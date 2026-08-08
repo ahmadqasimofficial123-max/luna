@@ -51,3 +51,13 @@
 - [x] Fix login page button so it starts the Manus OAuth flow reliably
 - [x] Validate the login button handler through TypeScript checking and a public landing-route smoke test
 - [x] Validate the login flow in the browser and save an updated checkpoint
+- [x] Diagnose invalid OAuth state by tracing state encoding, cookie attributes, and callback validation
+- [x] Fix OAuth state cookie/callback compatibility without weakening CSRF protection
+- [x] Add regression coverage for OAuth state generation and callback validation
+- [x] Verify the complete login callback flow and save an updated checkpoint
+- [ ] Inspect GitHub export connection and target repository details
+- [ ] Confirm the latest Luna Social checkpoint is ready for export
+- [ ] Export or push Luna Social to the requested GitHub repository
+- [ ] Verify the resulting GitHub repository URL and branch state
+- [ ] Push the current Luna Social main branch to ahmadqasimofficial123-max/luna
+- [ ] Verify the remote branch commit and repository URL after pushing
