@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { addComment, createPost, createReport, createStory, followUser, getFeed, getProfile, getSettings, listMessages, listNotifications, listStories, reactToStory, replyToStory, toggleBlock, toggleLike, toggleMute, toggleSave, updateProfile, updateSettings } from "./db";
+import { addComment, createPost, createReport, createStory, followUser, getFeed, getProfile, getSettings, hidePost, listMessages, listNotifications, listReports, listStories, reactToStory, replyToStory, sharePost, toggleBlock, toggleLike, toggleMute, toggleSave, updateProfile, updateSettings } from "./db";
 import { storagePut } from "./storage";
 
 const mediaSchema = z.object({ url: z.string().min(1), mediaType: z.enum(["image", "video"]), width: z.number().optional(), height: z.number().optional() });
@@ -24,6 +24,7 @@ export const appRouter = router({
     stories: publicProcedure.query(() => listStories()),
     profile: publicProcedure.input(z.object({ userId: z.number().int().positive() })).query(({ input }) => getProfile(input.userId)),
     notifications: protectedProcedure.query(({ ctx }) => listNotifications(ctx.user.id)),
+    reports: protectedProcedure.query(() => listReports()),
     settings: protectedProcedure.query(({ ctx }) => getSettings(ctx.user.id)),
     updateSettings: protectedProcedure.input(z.object({ discoverable: z.boolean().optional(), allowMessages: z.enum(["everyone", "followers", "none"]).optional(), emailNotifications: z.boolean().optional(), pushNotifications: z.boolean().optional(), theme: z.enum(["dark", "light", "system"]).optional(), twoFactorEnabled: z.boolean().optional() })).mutation(({ ctx, input }) => updateSettings(ctx.user.id, input)),
     messages: protectedProcedure.query(({ ctx }) => listMessages(ctx.user.id)),
@@ -35,6 +36,8 @@ export const appRouter = router({
     follow: protectedProcedure.input(z.object({ userId: z.number().int().positive(), isPrivate: z.boolean() })).mutation(({ ctx, input }) => followUser(ctx.user.id, input.userId, input.isPrivate)),
     block: protectedProcedure.input(z.object({ userId: z.number().int().positive() })).mutation(({ ctx, input }) => toggleBlock(ctx.user.id, input.userId)),
     mute: protectedProcedure.input(z.object({ userId: z.number().int().positive() })).mutation(({ ctx, input }) => toggleMute(ctx.user.id, input.userId)),
+    share: protectedProcedure.input(z.object({ postId: z.number().int().positive() })).mutation(({ ctx, input }) => sharePost(ctx.user.id, input.postId)),
+    hide: protectedProcedure.input(z.object({ postId: z.number().int().positive() })).mutation(({ ctx, input }) => hidePost(ctx.user.id, input.postId)),
     report: protectedProcedure.input(z.object({ postId: z.number().int().positive().optional(), commentId: z.number().int().positive().optional(), reportedUserId: z.number().int().positive().optional(), reason: z.string().min(2).max(120), details: z.string().max(1000).optional() })).mutation(({ ctx, input }) => createReport(ctx.user.id, input)),
     createStory: protectedProcedure.input(z.object({ mediaUrl: z.string().min(1), mediaType: z.enum(["image", "video"]), caption: z.string().max(180).optional() })).mutation(({ ctx, input }) => createStory(ctx.user.id, input.mediaUrl, input.mediaType, input.caption)),
     reactStory: protectedProcedure.input(z.object({ storyId: z.number().int().positive(), reaction: z.string().min(1).max(16) })).mutation(({ ctx, input }) => reactToStory(ctx.user.id, input.storyId, input.reaction)),
