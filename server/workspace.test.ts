@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import { outgoingMessageStatus } from "../client/src/pages/Messages";
 
 function createContext(): TrpcContext {
   const now = new Date();
@@ -31,6 +32,11 @@ describe("workspace procedure contracts", () => {
     const messages = await caller.social.messages({ conversationId: 1 });
     expect(Array.isArray(messages)).toBe(true);
     await expect(caller.social.sendMessage({ conversationId: 1, body: "", attachmentUrl: "https://cdn.example.com/photo.png", attachmentType: "image" })).rejects.toThrow("not a member");
+  });
+
+  it("keeps outgoing status honest without recipient-read evidence", () => {
+    expect(outgoingMessageStatus({ optimistic: true })).toBe("Sending…");
+    expect(outgoingMessageStatus({ optimistic: false })).toBe("Sent");
   });
 
   it("rejects interaction mutations for conversations the user cannot access", async () => {

@@ -85,6 +85,7 @@
 - [x] Verify the remote branch contains the latest commit
 - [x] Build responsive /messages and /messages/:conversationId views with conversation search, filters, static presence cues, and message composer; include a true no-selection state and mobile inbox access
 - [x] Add production-backed membership-aware message history, sending, attachments, reactions, persisted read receipts, and realtime-friendly refresh behavior; keep voice calls clearly scoped
-- [ ] Add messaging tests, visual verification, checkpoint, and GitHub synchronization after the fixes
+- [x] Add messaging tests, visual verification, checkpoint, and GitHub synchronization after the fixes
 - [x] Replace starter conversation data with membership-aware inbox queries and validate conversation access
-- [ ] Persist message reactions and current-user read receipts with honest sent/read UI indicators; keep unsupported voice/file behavior clearly scoped
+- [x] Persist message reactions and current-user read receipts with an honest “Sent” status only; keep unsupported voice/file behavior clearly scoped
+- [x] Add regression coverage proving outgoing messages do not claim recipient reads without recipient evidence
