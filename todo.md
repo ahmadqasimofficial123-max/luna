@@ -3,25 +3,32 @@
 - [x] Establish Luna Social visual system and responsive application shell
 - [x] Add social domain schema for profiles, follows, posts, media, comments, stories, messages, notifications, reports, blocks, mutes, and settings
 - [x] Add server query and mutation procedures for authentication-aware social workflows
-- [ ] Build public landing page and authenticated navigation
-- [ ] Build home feed with optimistic like, save, comment, share, hide, and mute interactions
-- [ ] Build profile pages with posts, videos, saved, tagged sections, and profile actions
-- [ ] Build post creation with media metadata, captions, hashtags, mentions, location, audience, and privacy controls
-- [ ] Build stories creation, viewing, reactions, replies, and 24-hour status presentation
-- [ ] Build direct messaging interface with conversations, unread indicators, and message composer
-- [ ] Build notifications center with social activity categories
-- [ ] Build explore and search experiences for users, posts, and hashtags
-- [ ] Build admin moderation dashboard for users, content, comments, reports, and analytics
-- [ ] Build privacy, security, notification, appearance, blocked, and muted account settings
+- [x] Build public landing page and authenticated navigation
+- [x] Build home feed with optimistic like, save, comment, share, hide, and mute interactions
+- [x] Build profile pages with posts, videos, saved, tagged sections, and profile actions
+- [x] Build post creation with media metadata, captions, hashtags, mentions, location, audience, and privacy controls
+- [x] Build stories creation, viewing, reactions, replies, and 24-hour story status presentation
+- [x] Build direct messaging interface with conversations, unread indicators, and message composer
+- [x] Build notifications center with social activity categories
+- [x] Build explore and search experiences for users, posts, and hashtags
+- [x] Build admin moderation dashboard for users, content, comments, reports, and analytics
+- [x] Build privacy, security, notification, appearance, blocked, and muted account settings
 - [x] Add Vitest coverage for core social procedures and validation rules
 - [x] Run type checks, tests, and responsive visual verification
 - [ ] Save final checkpoint and deliver the project version
 - [x] Add structured settings storage and procedures for privacy, security, notification, and appearance preferences
-- [ ] Implement real feed actions for comment, share, hide, and mute with backend support and proper optimistic/error handling
-- [ ] Build a full post composer with media selection/upload, preview, hashtags/mentions, location, audience/privacy, and comments-enabled controls
-- [ ] Implement story viewer, reaction/reply flows, and visible 24-hour story state in the UI
+- [x] Implement real feed actions for comment, share, hide, and mute with backend support and proper optimistic/error handling
+- [x] Build a full post composer with media selection/upload, preview, hashtags/mentions, location, audience/privacy, and comments-enabled controls
+- [x] Implement story viewer, reaction/reply flows, and visible 24-hour story state in the UI
 - [x] Add Vitest tests for social procedures and validation paths
 - [x] Add Vitest coverage for post creation, like/save/comment mutations, story creation/listing, report creation, profile/settings update success paths, and error/validation cases
 - [x] Add Vitest success-path tests for social.createPost, social.like, social.save, and social.comment with mocked DB helpers or isolated procedure-level assertions
 - [x] Add Vitest success-path tests for social.createStory, social.stories, and social.report, including expected return behavior
 - [x] Add Vitest success-path tests for social.updateProfile, social.settings, and social.updateSettings, verifying valid inputs and persistence/update calls
+- [ ] Add real routes/layout separation for public landing vs authenticated app navigation
+- [ ] Wire feed comment/share/hide/mute to server procedures with optimistic updates and rollback/error states
+- [ ] Build functional profile, messages, notifications, explore/search, admin, and settings screens using real data and required actions
+- [ ] Complete composer with actual media upload/preview and submit all metadata fields
+- [ ] Implement full story viewer with reactions, replies, and visible expiry state
+- [ ] Complete post composer with actual media upload/preview and submit all metadata fields to the backend
+- [ ] Implement real story creation flow, reply/reaction mutations, and data-driven expiry/24-hour status presentation

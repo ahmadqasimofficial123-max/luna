@@ -1,6 +1,6 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { accountSettings, blocks, comments, follows, likes, messages, mutes, notifications, postMedia, posts, reports, saves, stories, users, type InsertUser } from "../drizzle/schema";
+import { accountSettings, blocks, comments, follows, likes, messages, mutes, notifications, postMedia, posts, reports, saves, stories, storyReactions, users, type InsertUser } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -32,3 +32,4 @@ export async function listMessages(userId: number) { const db = await getDb(); i
 export async function createReport(reporterId: number, input: { postId?: number; commentId?: number; reportedUserId?: number; reason: string; details?: string }) { const db = await getDb(); if (!db) return; await db.insert(reports).values({ reporterId, ...input }); }
 export async function createStory(authorId: number, mediaUrl: string, mediaType: "image" | "video", caption?: string) { const db = await getDb(); if (!db) return; await db.insert(stories).values({ authorId, mediaUrl, mediaType, caption, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) }); }
 export async function listStories() { const db = await getDb(); if (!db) return []; return db.select({ story: stories, author: users }).from(stories).innerJoin(users, eq(users.id, stories.authorId)).where(sql`${stories.expiresAt} > NOW()`).orderBy(desc(stories.createdAt)); }
+export async function reactToStory(userId: number, storyId: number, reaction: string) { const db = await getDb(); if (!db) return { success: true }; await db.insert(storyReactions).values({ userId, storyId, reaction }).onDuplicateKeyUpdate({ set: { reaction } }); return { success: true }; }

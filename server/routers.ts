@@ -3,11 +3,18 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { addComment, createPost, createReport, createStory, followUser, getFeed, getProfile, getSettings, listMessages, listNotifications, listStories, toggleBlock, toggleLike, toggleMute, toggleSave, updateProfile, updateSettings } from "./db";
+import { addComment, createPost, createReport, createStory, followUser, getFeed, getProfile, getSettings, listMessages, listNotifications, listStories, reactToStory, toggleBlock, toggleLike, toggleMute, toggleSave, updateProfile, updateSettings } from "./db";
+import { storagePut } from "./storage";
 
-const mediaSchema = z.object({ url: z.string().url(), mediaType: z.enum(["image", "video"]), width: z.number().optional(), height: z.number().optional() });
+const mediaSchema = z.object({ url: z.string().min(1), mediaType: z.enum(["image", "video"]), width: z.number().optional(), height: z.number().optional() });
 export const appRouter = router({
   system: systemRouter,
+  media: router({
+    upload: protectedProcedure.input(z.object({ filename: z.string().min(1).max(180), contentType: z.string().min(1).max(120), data: z.string().min(1).max(8_000_000) })).mutation(async ({ ctx, input }) => {
+      const bytes = Buffer.from(input.data, "base64");
+      return storagePut(`${ctx.user.id}/uploads/${input.filename}`, bytes, input.contentType);
+    }),
+  }),
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => { const cookieOptions = getSessionCookieOptions(ctx.req); ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 }); return { success: true } as const; }),
@@ -29,7 +36,8 @@ export const appRouter = router({
     block: protectedProcedure.input(z.object({ userId: z.number().int().positive() })).mutation(({ ctx, input }) => toggleBlock(ctx.user.id, input.userId)),
     mute: protectedProcedure.input(z.object({ userId: z.number().int().positive() })).mutation(({ ctx, input }) => toggleMute(ctx.user.id, input.userId)),
     report: protectedProcedure.input(z.object({ postId: z.number().int().positive().optional(), commentId: z.number().int().positive().optional(), reportedUserId: z.number().int().positive().optional(), reason: z.string().min(2).max(120), details: z.string().max(1000).optional() })).mutation(({ ctx, input }) => createReport(ctx.user.id, input)),
-    createStory: protectedProcedure.input(z.object({ mediaUrl: z.string().url(), mediaType: z.enum(["image", "video"]), caption: z.string().max(180).optional() })).mutation(({ ctx, input }) => createStory(ctx.user.id, input.mediaUrl, input.mediaType, input.caption)),
+    createStory: protectedProcedure.input(z.object({ mediaUrl: z.string().min(1), mediaType: z.enum(["image", "video"]), caption: z.string().max(180).optional() })).mutation(({ ctx, input }) => createStory(ctx.user.id, input.mediaUrl, input.mediaType, input.caption)),
+    reactStory: protectedProcedure.input(z.object({ storyId: z.number().int().positive(), reaction: z.string().min(1).max(16) })).mutation(({ ctx, input }) => reactToStory(ctx.user.id, input.storyId, input.reaction)),
   }),
 });
 export type AppRouter = typeof appRouter;
