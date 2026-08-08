@@ -43,6 +43,13 @@
       "when": 1786206425456,
       "tag": "0005_famous_toro",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1786209374111,
+      "tag": "0006_faulty_zaran",
+      "breakpoints": true
     }
   ]
 }

@@ -61,3 +61,21 @@
 - [x] Verify the resulting GitHub repository URL and branch state
 - [x] Push the current Luna Social main branch to ahmadqasimofficial123-max/luna
 - [x] Verify the remote branch commit and repository URL after pushing
+- [x] Diagnose the stories query failure and identify whether the deployed database is missing the stories table or has a schema mismatch
+- [x] Fix the stories query/database compatibility issue without breaking story creation, reactions, replies, or expiry behavior
+- [x] Add regression coverage for stories validation and related story procedure behavior
+- [x] Validate the repaired live schema, TypeScript build, 20-test suite, and unauthenticated route fallback; authenticated browser smoke test remains environment-dependent
+- [x] Audit every visible Luna Social button on public and authenticated surfaces
+- [x] Fix any button that has no handler, wrong navigation, or failing mutation
+- [x] Validate repaired button handlers through TypeScript checking and the existing 20-test suite
+- [x] Re-run the button audit and save an updated checkpoint with findings
+- [ ] Perform an authenticated in-browser audit of the app shell and notification interactions after signing in, then save a checkpoint
+- [ ] Fix and verify any remaining no-op or broken Button-component controls after authenticated browser testing
+- [ ] Save a new checkpoint after completing and documenting the full authenticated button audit
+- [x] Model notification categories for follow requests, pending follows, follows, likes, comments, mentions, story reactions, and messages
+- [x] Add contextual three-dot menus with persisted approve, decline, cancel request, mute, hide, and mark-read actions plus report entry point
+- [x] Add category-based destination routing from notifications to Home, Messages, and Profile views; entity-specific deep links remain a follow-up
+- [x] Add notification-specific input-contract regression tests; authenticated shell visual verification remains environment-dependent
+- [x] Add an explicit Mark as read option to each notification three-dot menu and wire it to social.markNotificationRead
+- [x] Split incoming follow-request approve/decline from outgoing pending-request cancel so each updates the correct follow direction
+- [x] Add focused notification menu success-path tests for approve, decline, cancel, mute, hide, and mark-read
