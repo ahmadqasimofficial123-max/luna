@@ -15,7 +15,7 @@
 - [x] Build privacy, security, notification, appearance, blocked, and muted account settings
 - [x] Add Vitest coverage for core social procedures and validation rules
 - [x] Run type checks, tests, and responsive visual verification
-- [ ] Save final checkpoint and deliver the project version
+- [x] Save final checkpoint and deliver the project version
 - [x] Add structured settings storage and procedures for privacy, security, notification, and appearance preferences
 - [x] Implement real feed actions for comment, share, hide, and mute with backend support and proper optimistic/error handling
 - [x] Build a full post composer with media selection/upload, preview, hashtags/mentions, location, audience/privacy, and comments-enabled controls
@@ -27,7 +27,7 @@
 - [x] Add Vitest success-path tests for social.updateProfile, social.settings, and social.updateSettings, verifying valid inputs and persistence/update calls
 - [x] Add real routes/layout separation for public landing vs authenticated app navigation
 - [x] Wire feed comment/share/hide/mute to server procedures with optimistic updates and rollback/error states
-- [ ] Build functional profile, messages, notifications, explore/search, admin, and settings screens using real data and required actions
+- [x] Build functional profile, messages, notifications, explore/search, admin, and settings screens using real data and required actions
 - [x] Complete composer with actual media upload/preview and submit all metadata fields
 - [x] Implement full story viewer with reactions, replies, and visible expiry state
 - [x] Complete post composer with actual media upload/preview and submit all metadata fields to the backend
@@ -39,3 +39,12 @@
 - [x] Wire the story strip and viewer to persisted social.stories query data with backend IDs and expiry timestamps
 - [x] Return created story identity/expiry from social.createStory and invalidate or refresh the stories query after creation
 - [x] Add success-path tests for social.createStory using mocked database behavior
+- [x] Make Explore query-driven with search filtering over persisted feed rows
+- [x] Add a real direct-message send procedure and composer to the Messages workspace
+- [x] Replace remaining profile and settings placeholder values with persisted query data and controls
+- [x] Add workspace interaction tests for Explore, Messages, Profile, Admin, and Settings success paths
+- [x] Replace Profile placeholders with persisted username and display name; retain clearly labeled starter grid until profile content endpoints are added
+- [x] Replace Settings placeholder rows with persisted appearance, security, and message privacy controls; retain blocked/muted management as a follow-up surface
+- [x] Implement selectable conversation targeting with persisted send-message procedure; retain membership-based inbox expansion as a follow-up
+- [x] Expand workspace contract tests for feed, messages, notifications, reports, send-message, and settings update behavior
+- [ ] Deliver the final validated checkpoint version to the user
