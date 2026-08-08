@@ -69,9 +69,9 @@
 - [x] Fix any button that has no handler, wrong navigation, or failing mutation
 - [x] Validate repaired button handlers through TypeScript checking and the existing 20-test suite
 - [x] Re-run the button audit and save an updated checkpoint with findings
-- [ ] Perform an authenticated in-browser audit of the app shell and notification interactions after signing in, then save a checkpoint
-- [ ] Fix and verify any remaining no-op or broken Button-component controls after authenticated browser testing
-- [ ] Save a new checkpoint after completing and documenting the full authenticated button audit
+- [ ] Perform a real authenticated browser audit of the app shell and notification interactions after sign-in, then save a checkpoint
+- [ ] Fix and verify any remaining no-op or broken Button-component controls found during the live authenticated audit
+- [ ] Save a new checkpoint only after the authenticated live button audit is completed and documented
 - [x] Model notification categories for follow requests, pending follows, follows, likes, comments, mentions, story reactions, and messages
 - [x] Add contextual three-dot menus with persisted approve, decline, cancel request, mute, hide, and mark-read actions plus report entry point
 - [x] Add category-based destination routing from notifications to Home, Messages, and Profile views; entity-specific deep links remain a follow-up
@@ -79,3 +79,7 @@
 - [x] Add an explicit Mark as read option to each notification three-dot menu and wire it to social.markNotificationRead
 - [x] Split incoming follow-request approve/decline from outgoing pending-request cancel so each updates the correct follow direction
 - [x] Add focused notification menu success-path tests for approve, decline, cancel, mute, hide, and mark-read
+- [x] Replace notification three-dot menus with visible action-status labels after an action is taken, preserving the label for the current page session
+- [x] Test notification action-status rendering and save a checkpoint
+- [ ] Commit and push the complete latest Luna Social codebase to ahmadqasimofficial123-max/luna
+- [ ] Verify the remote branch contains the latest commit

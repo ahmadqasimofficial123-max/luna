@@ -50,6 +50,7 @@ nav { display: grid; gap: 6px; }
 .notification-actions { position: relative; margin-left: auto; }
 .notification-actions > button { display: grid; place-items: center; width: 2rem; height: 2rem; border: 0; border-radius: 999px; color: var(--muted-foreground); background: transparent; cursor: pointer; }
 .notification-actions > button:hover { color: var(--foreground); background: color-mix(in srgb, var(--foreground) 8%, transparent); }
+.notification-status { display: inline-flex; align-items: center; min-height: 2rem; padding: .35rem .65rem; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border)); border-radius: 999px; color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); font-size: .72rem; font-weight: 600; white-space: nowrap; }
 .notification-menu { position: absolute; z-index: 20; top: calc(100% + .45rem); right: 0; min-width: 12rem; padding: .35rem; border: 1px solid var(--border); border-radius: .85rem; background: var(--card); box-shadow: 0 16px 38px rgb(0 0 0 / 28%); }
 .notification-menu button { display: block; width: 100%; padding: .55rem .7rem; border: 0; border-radius: .55rem; color: var(--card-foreground); background: transparent; text-align: left; font-size: .8rem; cursor: pointer; }
 .notification-menu button:hover { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--foreground); }
