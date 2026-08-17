@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
+import { calculateConversationUnreadCount } from "./db";
 import type { TrpcContext } from "./_core/context";
 import { outgoingMessageStatus } from "../client/src/pages/Messages";
 
@@ -32,6 +33,14 @@ describe("workspace procedure contracts", () => {
     const messages = await caller.social.messages({ conversationId: 1 });
     expect(Array.isArray(messages)).toBe(true);
     await expect(caller.social.sendMessage({ conversationId: 1, body: "", attachmentUrl: "https://cdn.example.com/photo.png", attachmentType: "image" })).rejects.toThrow("not a member");
+  });
+
+  it("derives unread counts only from unread messages sent by other members", () => {
+    const now = new Date("2026-08-17T12:00:00Z");
+    expect(calculateConversationUnreadCount([], 77, null)).toBe(0);
+    expect(calculateConversationUnreadCount([{ senderId: 77, createdAt: now }], 77, null)).toBe(0);
+    expect(calculateConversationUnreadCount([{ senderId: 88, createdAt: now }], 77, now)).toBe(0);
+    expect(calculateConversationUnreadCount([{ senderId: 88, createdAt: new Date(now.getTime() + 1000) }], 77, now)).toBe(1);
   });
 
   it("keeps outgoing status honest without recipient-read evidence", () => {

@@ -89,3 +89,5 @@
 - [x] Replace starter conversation data with membership-aware inbox queries and validate conversation access
 - [x] Persist message reactions and current-user read receipts with an honest “Sent” status only; keep unsupported voice/file behavior clearly scoped
 - [x] Add regression coverage proving outgoing messages do not claim recipient reads without recipient evidence
+- [x] Fix Messages unread badge so it is derived from real unread membership conversations and is hidden or zero when no members/messages exist
+- [x] Add unread-count regression coverage, verify the inbox visually, and save a checkpoint
