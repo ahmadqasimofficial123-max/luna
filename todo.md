@@ -91,3 +91,5 @@
 - [x] Add regression coverage proving outgoing messages do not claim recipient reads without recipient evidence
 - [x] Fix Messages unread badge so it is derived from real unread membership conversations and is hidden or zero when no members/messages exist
 - [x] Add unread-count regression coverage, verify the inbox visually, and save a checkpoint
+- [x] Fix the DialogContent accessibility warning by adding an accessible DialogTitle to every rendered dialog on the Home page
+- [x] Verify the dialog warning is gone, run tests, and save a checkpoint
