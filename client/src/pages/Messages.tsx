@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { selectConversationAfterInboxRefresh } from "./messages-selection";
 
 type ChatMessage = { id: number; conversationId: number; senderId: number; body: string; attachmentUrl?: string | null; attachmentType?: "image" | "video" | "voice" | null; createdAt: Date; readAt?: Date | null; optimistic?: boolean; reaction?: string };
 type Conversation = { id: number; name: string; username: string; avatar: string; lastMessage: string; time: string; unread: number; online: boolean; group?: boolean; pinned?: boolean };
@@ -34,7 +35,7 @@ export default function Messages() {
   const searchRef = useRef<HTMLInputElement>(null);
   const inboxQuery = trpc.social.inbox.useQuery(undefined, { enabled: isAuthenticated, refetchInterval: 10000 });
   const memberSearchQuery = trpc.social.memberSearch.useQuery({ query: search.trim() }, { enabled: isAuthenticated && search.trim().length >= 2, staleTime: 20_000 });
-  const openConversationMutation = trpc.social.openDirectConversation.useMutation({ onSuccess: result => { if (result.conversationId > 0) { void inboxQuery.refetch(); navigate(`/messages/${result.conversationId}`); setSearch(""); } } });
+  const openConversationMutation = trpc.social.openDirectConversation.useMutation({ onSuccess: async result => { if (result.conversationId > 0) { await selectConversationAfterInboxRefresh({ conversationId: result.conversationId, refreshInbox: () => inboxQuery.refetch(), clearSearch: () => setSearch(""), navigate }); } } });
   const messagesQuery = trpc.social.messages.useQuery({ conversationId: selectedId || undefined }, { enabled: isAuthenticated && selectedId > 0, refetchInterval: 5000 });
   const sendMutation = trpc.social.sendMessage.useMutation();
   const reactMessageMutation = trpc.social.reactToMessage.useMutation();

@@ -3,6 +3,7 @@ import { appRouter } from "./routers";
 import { calculateConversationUnreadCount, isDirectConversationMemberCount, normalizeMemberSearchTerm } from "./db";
 import type { TrpcContext } from "./_core/context";
 import { outgoingMessageStatus } from "../client/src/pages/Messages";
+import { selectConversationAfterInboxRefresh, selectedConversationIsKnown } from "../client/src/pages/messages-selection";
 
 function createContext(): TrpcContext {
   const now = new Date();
@@ -50,6 +51,19 @@ describe("workspace procedure contracts", () => {
     const caller = appRouter.createCaller(createContext());
     await expect(caller.social.memberSearch({ query: "a" })).rejects.toThrow();
     await expect(caller.social.openDirectConversation({ memberId: 77 })).rejects.toThrow("yourself");
+  });
+
+  it("waits for inbox refresh before selecting a newly created direct chat", async () => {
+    const events: string[] = [];
+    await selectConversationAfterInboxRefresh({
+      conversationId: 42,
+      refreshInbox: async () => { events.push("refresh-start"); await Promise.resolve(); events.push("refresh-done"); },
+      clearSearch: () => events.push("clear-search"),
+      navigate: path => events.push(`navigate:${path}`),
+    });
+    expect(events).toEqual(["refresh-start", "refresh-done", "clear-search", "navigate:/messages/42"]);
+    expect(selectedConversationIsKnown(42, [42, 43])).toBe(true);
+    expect(selectedConversationIsKnown(42, [43])).toBe(false);
   });
 
   it("keeps outgoing status honest without recipient-read evidence", () => {

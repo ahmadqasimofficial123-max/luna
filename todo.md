@@ -100,3 +100,6 @@
 - [ ] Verify matching member results and direct-chat creation with a signed-in browser session, then save a checkpoint
 - [x] Persist notification action-status labels across navigation and page reloads by deriving them from server state
 - [x] Add notification persistence regression coverage and verify the implementation with 30 passing tests
+- [x] Fix direct-chat member selection that could return to /messages before the inbox refresh completed
+- [x] Add direct-chat selection regression coverage and verify the Messages route renders correctly
+- [ ] Perform signed-in verification that selecting a member changes the visible route/chat state, then save a checkpoint
