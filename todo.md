@@ -93,3 +93,8 @@
 - [x] Add unread-count regression coverage, verify the inbox visually, and save a checkpoint
 - [x] Fix the DialogContent accessibility warning by adding an accessible DialogTitle to every rendered dialog on the Home page
 - [x] Verify the dialog warning is gone, run tests, and save a checkpoint
+- [x] Add authenticated member search for Messages so matching users outside existing conversations appear while typing
+- [x] Let a selected member create or open a one-to-one conversation and enter the chat
+- [x] Add member-search tests, responsive verification, and save a checkpoint
+- [x] Fix member search returning no users when searching to start a chat
+- [ ] Verify matching member results and direct-chat creation with a signed-in browser session, then save a checkpoint

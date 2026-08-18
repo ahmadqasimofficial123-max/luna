@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
-import { calculateConversationUnreadCount } from "./db";
+import { calculateConversationUnreadCount, isDirectConversationMemberCount, normalizeMemberSearchTerm } from "./db";
 import type { TrpcContext } from "./_core/context";
 import { outgoingMessageStatus } from "../client/src/pages/Messages";
 
@@ -41,6 +41,15 @@ describe("workspace procedure contracts", () => {
     expect(calculateConversationUnreadCount([{ senderId: 77, createdAt: now }], 77, null)).toBe(0);
     expect(calculateConversationUnreadCount([{ senderId: 88, createdAt: now }], 77, now)).toBe(0);
     expect(calculateConversationUnreadCount([{ senderId: 88, createdAt: new Date(now.getTime() + 1000) }], 77, now)).toBe(1);
+  });
+
+  it("normalizes member search terms and rejects invalid or self-chat requests", async () => {
+    expect(normalizeMemberSearchTerm("  @MayaChan  ")).toBe("mayachan");
+    expect(isDirectConversationMemberCount(2)).toBe(true);
+    expect(isDirectConversationMemberCount(3)).toBe(false);
+    const caller = appRouter.createCaller(createContext());
+    await expect(caller.social.memberSearch({ query: "a" })).rejects.toThrow();
+    await expect(caller.social.openDirectConversation({ memberId: 77 })).rejects.toThrow("yourself");
   });
 
   it("keeps outgoing status honest without recipient-read evidence", () => {

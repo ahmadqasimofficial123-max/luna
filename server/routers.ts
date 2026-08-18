@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { addComment, createPost, createReport, createStory, followUser, getFeed, getProfile, getSettings, hideNotification, hidePost, listConversationInbox, listMessages, listNotifications, markMessagesRead, reactToMessage, listReports, listStories, markNotificationRead, muteNotificationType, reactToStory, replyToStory, sendMessage, sharePost, toggleBlock, toggleLike, toggleMute, toggleSave, updateFollowStatus, updateProfile, updateSettings } from "./db";
+import { addComment, createPost, createReport, createStory, findOrCreateDirectConversation, followUser, getFeed, getProfile, getSettings, hideNotification, hidePost, listConversationInbox, searchMembers, listMessages, listNotifications, markMessagesRead, reactToMessage, listReports, listStories, markNotificationRead, muteNotificationType, reactToStory, replyToStory, sendMessage, sharePost, toggleBlock, toggleLike, toggleMute, toggleSave, updateFollowStatus, updateProfile, updateSettings } from "./db";
 import { storagePut } from "./storage";
 
 const mediaSchema = z.object({ url: z.string().min(1), mediaType: z.enum(["image", "video"]), width: z.number().optional(), height: z.number().optional() });
@@ -32,6 +32,8 @@ export const appRouter = router({
     settings: protectedProcedure.query(({ ctx }) => getSettings(ctx.user.id)),
     updateSettings: protectedProcedure.input(z.object({ discoverable: z.boolean().optional(), allowMessages: z.enum(["everyone", "followers", "none"]).optional(), emailNotifications: z.boolean().optional(), pushNotifications: z.boolean().optional(), theme: z.enum(["dark", "light", "system"]).optional(), twoFactorEnabled: z.boolean().optional() })).mutation(({ ctx, input }) => updateSettings(ctx.user.id, input)),
     inbox: protectedProcedure.query(({ ctx }) => listConversationInbox(ctx.user.id)),
+    memberSearch: protectedProcedure.input(z.object({ query: z.string().min(2).max(80) })).query(({ ctx, input }) => searchMembers(ctx.user.id, input.query)),
+    openDirectConversation: protectedProcedure.input(z.object({ memberId: z.number().int().positive() })).mutation(({ ctx, input }) => findOrCreateDirectConversation(ctx.user.id, input.memberId)),
     messages: protectedProcedure.input(z.object({ conversationId: z.number().int().positive().optional() }).optional()).query(({ ctx, input }) => listMessages(ctx.user.id, input?.conversationId)),
     sendMessage: protectedProcedure.input(z.object({ conversationId: z.number().int().positive(), body: z.string().max(2000), attachmentUrl: z.string().url().optional(), attachmentType: z.enum(["image", "video", "voice"]).optional() }).refine(input => input.body.trim().length > 0 || input.attachmentUrl, "Message text or an attachment is required")).mutation(({ ctx, input }) => sendMessage(ctx.user.id, input.conversationId, input.body, input.attachmentUrl, input.attachmentType)),
     reactToMessage: protectedProcedure.input(z.object({ messageId: z.number().int().positive(), reaction: z.string().max(16) })).mutation(({ ctx, input }) => reactToMessage(ctx.user.id, input.messageId, input.reaction)),
