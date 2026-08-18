@@ -103,3 +103,7 @@
 - [x] Fix direct-chat member selection that could return to /messages before the inbox refresh completed
 - [x] Add direct-chat selection regression coverage and verify the Messages route renders correctly
 - [ ] Perform signed-in verification that selecting a member changes the visible route/chat state, then save a checkpoint
+- [x] Fix the mutation that returns HTML (`Unexpected token '<'`) instead of a JSON tRPC response by moving media uploads to an authenticated binary endpoint
+- [x] Add regression coverage, verify the affected mutation path with TypeScript/Vitest and server logs, and save a checkpoint
+- [x] Add focused binary upload coverage for supported media, invalid payloads, malformed filenames, auth status mapping, and storage failures
+- [ ] Perform an authenticated post/story/message media-upload smoke test in the live browser session

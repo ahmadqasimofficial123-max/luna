@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { uploadMediaFile } from "@/lib/media-upload";
 import { selectConversationAfterInboxRefresh } from "./messages-selection";
 
 type ChatMessage = { id: number; conversationId: number; senderId: number; body: string; attachmentUrl?: string | null; attachmentType?: "image" | "video" | "voice" | null; createdAt: Date; readAt?: Date | null; optimistic?: boolean; reaction?: string };
@@ -16,7 +17,6 @@ export function outgoingMessageStatus(message: { optimistic?: boolean }) { retur
 
 
 function formatTime(value: Date | string) { return new Date(value).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
-function fileToBase64(file: File) { return new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(",")[1] || ""); reader.onerror = reject; reader.readAsDataURL(file); }); }
 
 export default function Messages() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -40,7 +40,6 @@ export default function Messages() {
   const sendMutation = trpc.social.sendMessage.useMutation();
   const reactMessageMutation = trpc.social.reactToMessage.useMutation();
   const markReadMutation = trpc.social.markMessagesRead.useMutation();
-  const uploadMutation = trpc.media.upload.useMutation();
   const conversations = useMemo<Conversation[]>(() => (inboxQuery.data || []).map(item => ({ id: item.conversation, name: item.member.displayName || item.member.name || "Luna member", username: item.member.username ? `@${item.member.username}` : "Luna member", avatar: item.member.avatarUrl || "https://i.pravatar.cc/120?img=47", lastMessage: item.lastMessage?.body || (item.lastMessage?.attachmentType ? `Sent a ${item.lastMessage.attachmentType}` : "Start a new signal"), time: item.lastMessage ? formatTime(item.lastMessage.createdAt) : "New", unread: item.unreadCount || 0, online: false })), [inboxQuery.data]);
   const selected = conversations.find(item => item.id === selectedId);
   const serverMessages = useMemo<ChatMessage[]>(() => (messagesQuery.data || []).map(message => ({ id: message.id, conversationId: message.conversationId, senderId: message.senderId, body: message.body || "", attachmentUrl: message.attachmentUrl, attachmentType: message.attachmentType, createdAt: new Date(message.createdAt), readAt: message.readAt ? new Date(message.readAt) : null })), [messagesQuery.data]);
@@ -59,7 +58,7 @@ export default function Messages() {
   const selectConversation = (id: number) => { setSelectedId(id); navigate(`/messages/${id}`); };
   const send = async () => {
     const body = draft.trim();
-    if ((!body && !attachment) || sendMutation.isPending || uploadMutation.isPending) return;
+    if ((!body && !attachment) || sendMutation.isPending) return;
     const optimisticId = -Date.now();
     const previewUrl = attachment ? URL.createObjectURL(attachment) : undefined;
     const attachmentType = attachment?.type.startsWith("image") ? "image" : attachment?.type.startsWith("video") ? "video" : undefined;
@@ -67,7 +66,7 @@ export default function Messages() {
     setLocalMessages(current => [...current, optimistic]); setDraft(""); setAttachment(null); setEmojiOpen(false);
     try {
       let uploadedUrl: string | undefined;
-      if (attachment) uploadedUrl = (await uploadMutation.mutateAsync({ filename: attachment.name, contentType: attachment.type || "application/octet-stream", data: await fileToBase64(attachment) })).url;
+      if (attachment) uploadedUrl = (await uploadMediaFile(attachment)).url;
       const created = await sendMutation.mutateAsync({ conversationId: selectedId, body, attachmentUrl: uploadedUrl, attachmentType });
       setLocalMessages(current => current.map(message => message.id === optimisticId ? { ...message, id: created.id, attachmentUrl: uploadedUrl, optimistic: false, createdAt: new Date() } : message));
       await messagesQuery.refetch();

@@ -7,6 +7,9 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import { sdk } from "./sdk";
+import { storagePut } from "../storage";
+import { normalizeUploadFilename, mediaUploadErrorResponse, validateMediaUpload } from "../media-upload";
 import { serveStatic, setupVite } from "./vite";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -36,6 +39,28 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+
+  // Binary media uploads bypass tRPC JSON serialization. This prevents large
+  // base64 video payloads from being rejected by the upstream gateway with an
+  // HTML 403 response that the tRPC client cannot parse as JSON.
+  app.post("/api/media/upload", express.raw({ limit: "50mb", type: "*/*" }), async (req, res) => {
+    try {
+      const user = await sdk.authenticateRequest(req);
+      const body = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || []);
+      const contentType = typeof req.headers["content-type"] === "string" ? req.headers["content-type"] : undefined;
+      const validation = validateMediaUpload(body, contentType);
+      if (!validation.ok) return res.status(validation.statusCode).json({ error: validation.error });
+      const encodedName = typeof req.headers["x-file-name"] === "string" ? req.headers["x-file-name"] : "upload";
+      const decodedName = normalizeUploadFilename(encodedName);
+      const uploaded = await storagePut(`${user.id}/uploads/${decodedName}`, body, validation.contentType);
+      return res.json(uploaded);
+    } catch (error) {
+      const failure = mediaUploadErrorResponse(error);
+      console.error("[Media Upload] Failed:", error);
+      return res.status(failure.statusCode).json({ error: failure.error });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",
