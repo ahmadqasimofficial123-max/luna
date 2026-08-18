@@ -17,7 +17,9 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 export async function getUserByOpenId(openId: string) { const db = await getDb(); if (!db) return undefined; const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1); return result[0]; }
 export async function getFeed(limit = 20) { const db = await getDb(); if (!db) return []; return db.select({ post: posts, media: postMedia, author: users }).from(posts).leftJoin(postMedia, eq(postMedia.postId, posts.id)).innerJoin(users, eq(users.id, posts.authorId)).orderBy(desc(posts.createdAt)).limit(limit); }
 export async function getProfile(userId: number) { const db = await getDb(); if (!db) return undefined; const result = await db.select().from(users).where(eq(users.id, userId)).limit(1); return result[0]; }
-export async function updateProfile(userId: number, input: Partial<Pick<InsertUser, "username" | "displayName" | "bio" | "website" | "avatarUrl" | "isPrivate">>) { const db = await getDb(); if (!db) return; await db.update(users).set(input).where(eq(users.id, userId)); }
+export function buildProfileUpdateNotifications(actorId: number, followerIds: number[]) { return Array.from(new Set(followerIds)).filter(recipientId => recipientId !== actorId).map(recipientId => ({ recipientId, actorId, type: "profile_update" as const, entityId: actorId })); }
+export function buildAdminPromotionNotification(actorId: number, targetId: number) { return { recipientId: targetId, actorId, type: "message" as const, entityId: targetId }; }
+export async function updateProfile(userId: number, input: Partial<Pick<InsertUser, "username" | "displayName" | "bio" | "website" | "avatarUrl" | "isPrivate">>) { const db = await getDb(); if (!db) return { success: true, notifiedFollowers: 0 }; await db.update(users).set(input).where(eq(users.id, userId)); const followerRows = await db.select({ followerId: follows.followerId }).from(follows).where(and(eq(follows.followingId, userId), eq(follows.status, "accepted"))); const profileNotifications = buildProfileUpdateNotifications(userId, followerRows.map(row => row.followerId)); if (profileNotifications.length) await db.insert(notifications).values(profileNotifications); return { success: true, notifiedFollowers: profileNotifications.length }; }
 export async function toggleLike(userId: number, postId: number) { const db = await getDb(); if (!db) return false; const existing = await db.select().from(likes).where(and(eq(likes.userId, userId), eq(likes.postId, postId))).limit(1); if (existing[0]) { await db.delete(likes).where(eq(likes.id, existing[0].id)); return false; } await db.insert(likes).values({ userId, postId }); return true; }
 export async function toggleSave(userId: number, postId: number) { const db = await getDb(); if (!db) return false; const existing = await db.select().from(saves).where(and(eq(saves.userId, userId), eq(saves.postId, postId))).limit(1); if (existing[0]) { await db.delete(saves).where(eq(saves.id, existing[0].id)); return false; } await db.insert(saves).values({ userId, postId }); return true; }
 export async function createPost(authorId: number, input: { caption?: string; location?: string; hashtags?: string; mentions?: string; audience?: "public" | "followers" | "private"; commentsEnabled?: boolean; media: { url: string; mediaType: "image" | "video"; width?: number; height?: number }[] }) { const db = await getDb(); if (!db) return undefined; const result = await db.insert(posts).values({ authorId, caption: input.caption, location: input.location, hashtags: input.hashtags, mentions: input.mentions, audience: input.audience ?? "public", commentsEnabled: input.commentsEnabled ?? true }); const postId = Number(result[0].insertId); if (input.media.length) await db.insert(postMedia).values(input.media.map((item, index) => ({ postId, ...item, sortOrder: index }))); return postId; }
@@ -52,3 +54,21 @@ export async function createStory(authorId: number, mediaUrl: string, mediaType:
 export async function listStories() { const db = await getDb(); if (!db) return []; return db.select({ story: stories, author: users }).from(stories).innerJoin(users, eq(users.id, stories.authorId)).where(sql`${stories.expiresAt} > NOW()`).orderBy(desc(stories.createdAt)); }
 export async function reactToStory(userId: number, storyId: number, reaction: string) { const db = await getDb(); if (!db) return { success: true }; await db.insert(storyReactions).values({ userId, storyId, reaction }).onDuplicateKeyUpdate({ set: { reaction } }); return { success: true }; }
 export async function replyToStory(authorId: number, storyId: number, body: string) { const db = await getDb(); if (!db) return { success: true }; await db.insert(storyReplies).values({ authorId, storyId, body }); return { success: true }; }
+
+export async function searchAdminUsers(query: string) {
+  const db = await getDb();
+  const normalized = query.trim().toLowerCase();
+  if (!db || normalized.length < 2) return [];
+  const pattern = `%${normalized}%`;
+  return db.select({ id: users.id, name: users.name, username: users.username, displayName: users.displayName, role: users.role, avatarUrl: users.avatarUrl }).from(users).where(sql`(LOWER(COALESCE(${users.username}, '')) LIKE ${pattern} OR LOWER(COALESCE(${users.displayName}, '')) LIKE ${pattern} OR LOWER(COALESCE(${users.name}, '')) LIKE ${pattern})`).limit(25);
+}
+
+export async function promoteSelectedUser(actorId: number, targetId: number) {
+  const db = await getDb();
+  if (!db || actorId === targetId) return { success: false as const, reason: "invalid_target" as const };
+  const [target] = await db.select({ id: users.id, role: users.role }).from(users).where(eq(users.id, targetId)).limit(1);
+  if (!target) return { success: false as const, reason: "not_found" as const };
+  await db.update(users).set({ role: "admin" }).where(eq(users.id, targetId));
+  await db.insert(notifications).values(buildAdminPromotionNotification(actorId, targetId));
+  return { success: true as const, userId: targetId };
+}

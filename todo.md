@@ -107,3 +107,17 @@
 - [x] Add regression coverage, verify the affected mutation path with TypeScript/Vitest and server logs, and save a checkpoint
 - [x] Add focused binary upload coverage for supported media, invalid payloads, malformed filenames, auth status mapping, and storage failures
 - [ ] Perform an authenticated post/story/message media-upload smoke test in the live browser session
+- [ ] Choose and document a production real-time transport for chat, with a lighter polling fallback comparison
+- [ ] Add durable chat lifecycle schema for attachments, replies, edits, deletes, delivery, reads, and searchable message metadata
+- [ ] Implement authenticated real-time events for new messages, delivery/read updates, reactions, edits, deletes, typing, presence, and notifications
+- [ ] Build the complete responsive chat UI for text, emoji, media, files, voice recording, replies, reactions, editing, deletion, search, and call entry points
+- [ ] Add focused security and lifecycle tests, live two-user verification, deployment-mode validation, checkpoint, and GitHub synchronization
+- [x] Repair chat empty-state/member selection so matching users appear and selected conversations open visibly
+- [x] Make image, video, and voice-message controls functional through the binary upload path, and clearly report that remote calls need realtime signaling
+- [x] Remove the chat-page “Back to your orbit” dead-end and provide consistent navigation controls
+- [x] Ensure profile edits notify accepted followers through targeted notifications without creating unwanted admin notifications
+- [x] Restrict admin actions to the authenticated admin and target only the selected user for admin notifications/role changes
+- [x] Add focused profile/admin regression tests and complete desktop/mobile responsive verification; save a checkpoint and push the complete release to GitHub remain as release steps
+- [ ] Capture direct responsive previews for the Profile and Admin workspace panels if a supported deep-link or authenticated interaction path is available
+- [ ] Save a new checkpoint after the verified profile-update notification and admin-targeting changes
+- [ ] Push the verified release to ahmadqasimofficial123-max/luna and confirm the remote commit
