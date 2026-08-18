@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   hideNotification: vi.fn().mockResolvedValue({ success: true }),
   muteNotificationType: vi.fn().mockResolvedValue({ success: true }),
   updateFollowStatus: vi.fn().mockResolvedValue({ success: true }),
+  recordNotificationAction: vi.fn().mockResolvedValue({ success: true, action: "hide" }),
 }));
 
 vi.mock("./db", async () => {
@@ -32,6 +33,12 @@ describe("notification action success paths", () => {
     expect(mocks.markNotificationRead).toHaveBeenCalledWith(1, 7);
     expect(mocks.hideNotification).toHaveBeenCalledWith(1, 7);
     expect(mocks.muteNotificationType).toHaveBeenCalledWith(1, "comment");
+  });
+
+  it("persists the selected action label for a notification", async () => {
+    const caller = appRouter.createCaller(createContext());
+    await caller.social.recordNotificationAction({ notificationId: 7, action: "hide" });
+    expect(mocks.recordNotificationAction).toHaveBeenCalledWith(1, 7, "hide");
   });
 
   it("delegates approve, decline, and cancel with their intended statuses", async () => {

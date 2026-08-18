@@ -57,6 +57,13 @@
       "when": 1786210610589,
       "tag": "0007_boring_mariko_yashida",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1787069168133,
+      "tag": "0008_sturdy_yellowjacket",
+      "breakpoints": true
     }
   ]
 }

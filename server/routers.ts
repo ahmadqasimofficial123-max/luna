@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { addComment, createPost, createReport, createStory, findOrCreateDirectConversation, followUser, getFeed, getProfile, getSettings, hideNotification, hidePost, listConversationInbox, searchMembers, listMessages, listNotifications, markMessagesRead, reactToMessage, listReports, listStories, markNotificationRead, muteNotificationType, reactToStory, replyToStory, sendMessage, sharePost, toggleBlock, toggleLike, toggleMute, toggleSave, updateFollowStatus, updateProfile, updateSettings } from "./db";
+import { addComment, createPost, createReport, createStory, findOrCreateDirectConversation, followUser, getFeed, getProfile, getSettings, hideNotification, hidePost, listConversationInbox, searchMembers, listMessages, listNotifications, markMessagesRead, reactToMessage, listReports, listStories, markNotificationRead, muteNotificationType, recordNotificationAction, reactToStory, replyToStory, sendMessage, sharePost, toggleBlock, toggleLike, toggleMute, toggleSave, updateFollowStatus, updateProfile, updateSettings } from "./db";
 import { storagePut } from "./storage";
 
 const mediaSchema = z.object({ url: z.string().min(1), mediaType: z.enum(["image", "video"]), width: z.number().optional(), height: z.number().optional() });
@@ -25,6 +25,7 @@ export const appRouter = router({
     profile: publicProcedure.input(z.object({ userId: z.number().int().positive() })).query(({ input }) => getProfile(input.userId)),
     notifications: protectedProcedure.query(({ ctx }) => listNotifications(ctx.user.id)),
     markNotificationRead: protectedProcedure.input(z.object({ notificationId: z.number().int().positive() })).mutation(({ ctx, input }) => markNotificationRead(ctx.user.id, input.notificationId)),
+    recordNotificationAction: protectedProcedure.input(z.object({ notificationId: z.number().int().positive(), action: z.enum(["approve", "decline", "cancel", "mute", "hide", "read", "report"]) })).mutation(({ ctx, input }) => recordNotificationAction(ctx.user.id, input.notificationId, input.action)),
     hideNotification: protectedProcedure.input(z.object({ notificationId: z.number().int().positive() })).mutation(({ ctx, input }) => hideNotification(ctx.user.id, input.notificationId)),
     muteNotification: protectedProcedure.input(z.object({ notificationType: z.string().min(1).max(32) })).mutation(({ ctx, input }) => muteNotificationType(ctx.user.id, input.notificationType)),
     updateFollowStatus: protectedProcedure.input(z.object({ actorId: z.number().int().positive(), status: z.enum(["accepted", "declined", "cancelled"]) })).mutation(({ ctx, input }) => updateFollowStatus(ctx.user.id, input.actorId, input.status)),

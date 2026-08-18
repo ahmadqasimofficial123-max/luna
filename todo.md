@@ -98,3 +98,5 @@
 - [x] Add member-search tests, responsive verification, and save a checkpoint
 - [x] Fix member search returning no users when searching to start a chat
 - [ ] Verify matching member results and direct-chat creation with a signed-in browser session, then save a checkpoint
+- [x] Persist notification action-status labels across navigation and page reloads by deriving them from server state
+- [x] Add notification persistence regression coverage and verify the implementation with 30 passing tests
