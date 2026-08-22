@@ -106,3 +106,10 @@ nav { display: grid; gap: 6px; }
 @keyframes realtime-pulse { 50% { opacity: .35; transform: scale(.75); } }
 @media (prefers-reduced-motion: reduce) { .realtime-status i { animation: none; } }
 @media (max-width: 640px) { .realtime-status { font-size: 9px; } }
+
+.messages-app-shell .messages-page { min-height: calc(100vh - 76px); }
+.messages-app-shell .messages-sidebar, .messages-app-shell .chat-panel { min-height: calc(100vh - 76px); }
+@media (max-width: 640px) {
+  .messages-app-shell .messages-page { min-height: calc(100vh - 64px); }
+  .messages-app-shell .messages-sidebar, .messages-app-shell .chat-panel { min-height: calc(100vh - 64px); }
+}

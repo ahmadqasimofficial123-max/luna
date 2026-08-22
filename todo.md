@@ -140,3 +140,4 @@
 - [x] Switch the realtime client to an explicit Offline/polling-fallback state after repeated stream failures, with regression coverage
 - [x] Keep the realtime status persistently Offline once the retry threshold is reached while background reconnect attempts continue and polling fallback remains active
 - [x] Add lifecycle-level realtime state-machine coverage proving repeated failures stay Offline until a real stream reconnect succeeds
+- [x] Restore the shared sidebar/navigation on the Messages page for desktop while preserving mobile inbox/chat switching, with regression coverage and responsive verification
