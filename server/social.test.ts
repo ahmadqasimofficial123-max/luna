@@ -36,6 +36,7 @@ describe("social router", () => {
     const caller = appRouter.createCaller(ctx({ id: 8 }));
     await expect(caller.social.createPost({ media: [], audience: "public", commentsEnabled: true })).rejects.toThrow();
     await expect(caller.social.updateProfile({ username: "x" })).rejects.toThrow();
+    await expect(caller.social.updateProfile({ avatarUrl: "ftp://example.com/avatar.png" })).rejects.toThrow();
     await expect(caller.social.createStory({ mediaUrl: "not-a-url", mediaType: "image" })).rejects.toThrow();
   });
 

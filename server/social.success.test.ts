@@ -40,10 +40,10 @@ describe("social success paths", () => {
   });
   it("updates profile and settings through persistence helpers", async () => {
     const caller = appRouter.createCaller(context());
-    await expect(caller.social.updateProfile({ displayName: "Updated Luna Member", bio: "Orbiting thoughtfully." })).resolves.toBeUndefined();
+    await expect(caller.social.updateProfile({ displayName: "Updated Luna Member", bio: "Orbiting thoughtfully.", avatarUrl: "/manus-storage/8/profile/avatar.png" })).resolves.toBeUndefined();
     await expect(caller.social.settings()).resolves.toMatchObject({ theme: "dark" });
     await expect(caller.social.updateSettings({ theme: "light", pushNotifications: false })).resolves.toBeUndefined();
-    expect(dbMocks.updateProfile).toHaveBeenCalledWith(8, { displayName: "Updated Luna Member", bio: "Orbiting thoughtfully." });
+    expect(dbMocks.updateProfile).toHaveBeenCalledWith(8, { displayName: "Updated Luna Member", bio: "Orbiting thoughtfully.", avatarUrl: "/manus-storage/8/profile/avatar.png" });
     expect(dbMocks.updateSettings).toHaveBeenCalledWith(8, { theme: "light", pushNotifications: false });
   });
 });

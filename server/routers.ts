@@ -8,6 +8,7 @@ import { addComment, createPost, createReport, createStory, findOrCreateDirectCo
 import { storagePut } from "./storage";
 
 const mediaSchema = z.object({ url: z.string().min(1), mediaType: z.enum(["image", "video"]), width: z.number().optional(), height: z.number().optional() });
+const avatarUrlSchema = z.string().min(1).refine(value => value.startsWith("/manus-storage/") || /^https?:\/\//i.test(value), "Avatar URL must be an http(s) or Manus storage URL");
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => { if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" }); return next(); });
 export const appRouter = router({
   system: systemRouter,
@@ -41,7 +42,7 @@ export const appRouter = router({
     sendMessage: protectedProcedure.input(z.object({ conversationId: z.number().int().positive(), body: z.string().max(2000), attachmentUrl: z.string().url().optional(), attachmentType: z.enum(["image", "video", "voice"]).optional() }).refine(input => input.body.trim().length > 0 || input.attachmentUrl, "Message text or an attachment is required")).mutation(({ ctx, input }) => sendMessage(ctx.user.id, input.conversationId, input.body, input.attachmentUrl, input.attachmentType)),
     reactToMessage: protectedProcedure.input(z.object({ messageId: z.number().int().positive(), reaction: z.string().max(16) })).mutation(({ ctx, input }) => reactToMessage(ctx.user.id, input.messageId, input.reaction)),
     markMessagesRead: protectedProcedure.input(z.object({ conversationId: z.number().int().positive() })).mutation(({ ctx, input }) => markMessagesRead(ctx.user.id, input.conversationId)),
-    updateProfile: protectedProcedure.input(z.object({ username: z.string().min(3).max(40).optional(), displayName: z.string().max(120).optional(), bio: z.string().max(500).optional(), website: z.string().url().or(z.literal("")).optional(), avatarUrl: z.string().url().optional(), isPrivate: z.boolean().optional() })).mutation(({ ctx, input }) => updateProfile(ctx.user.id, input)),
+    updateProfile: protectedProcedure.input(z.object({ username: z.string().min(3).max(40).optional(), displayName: z.string().max(120).optional(), bio: z.string().max(500).optional(), website: z.string().url().or(z.literal("")).optional(), avatarUrl: avatarUrlSchema.optional(), isPrivate: z.boolean().optional() })).mutation(({ ctx, input }) => updateProfile(ctx.user.id, input)),
     createPost: protectedProcedure.input(z.object({ caption: z.string().max(2200).optional(), location: z.string().max(180).optional(), hashtags: z.string().max(1000).optional(), mentions: z.string().max(1000).optional(), audience: z.enum(["public", "followers", "private"]).default("public"), commentsEnabled: z.boolean().default(true), media: z.array(mediaSchema).min(1).max(10) })).mutation(({ ctx, input }) => createPost(ctx.user.id, input)),
     like: protectedProcedure.input(z.object({ postId: z.number().int().positive() })).mutation(({ ctx, input }) => toggleLike(ctx.user.id, input.postId)),
     save: protectedProcedure.input(z.object({ postId: z.number().int().positive() })).mutation(({ ctx, input }) => toggleSave(ctx.user.id, input.postId)),

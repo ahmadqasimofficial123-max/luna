@@ -119,5 +119,7 @@
 - [x] Restrict admin actions to the authenticated admin and target only the selected user for admin notifications/role changes
 - [x] Add focused profile/admin regression tests and complete desktop/mobile responsive verification; save a checkpoint and push the complete release to GitHub remain as release steps
 - [ ] Capture direct responsive previews for the Profile and Admin workspace panels if a supported deep-link or authenticated interaction path is available
-- [ ] Save a new checkpoint after the verified profile-update notification and admin-targeting changes
-- [ ] Push the verified release to ahmadqasimofficial123-max/luna and confirm the remote commit
+- [x] Save a new checkpoint after the verified profile-update notification and admin-targeting changes
+- [x] Push the verified release to ahmadqasimofficial123-max/luna and confirm the remote branch/repository state
+- [x] Fix profile-picture selection/upload/save so the avatar persists to the authenticated user profile and updates across the app
+- [x] Add profile-avatar upload/persistence regression coverage and verify the repaired profile flow with a clean TypeScript check, 40 passing Vitest tests, and a refreshed preview
