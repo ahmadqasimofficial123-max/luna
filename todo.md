@@ -127,3 +127,7 @@
 - [x] Document that the project already uses React/Tailwind on the frontend and Express/tRPC on the backend; add call-state regression coverage and responsive verification
 - [x] Run a broad release audit covering automated tests, TypeScript/build health, server/browser logs, responsive routes, and main interactive surfaces; document confirmed behavior and environment-dependent limits
 - [x] Document release-audit results: passing TypeScript/Vitest/build checks, verified desktop/mobile routes and HTTP smoke tests, historical-only log errors, and live-session limitations
+- [x] Add an admin-only App settings page to edit persisted app name, tagline, theme, and accent color; apply changes globally with automated tests and a direct preview deep link
+- [ ] Perform signed-in desktop/mobile visual verification of the authenticated admin App settings workspace and confirm the `?workspace=app-settings` deep link for an admin session
+- [x] Narrow the delivered App settings scope documentation to app name, tagline, theme, and accent color
+- [x] Create and verify a production sitemap.xml containing only the public Luna Social route
