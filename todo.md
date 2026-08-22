@@ -123,3 +123,5 @@
 - [x] Push the verified release to ahmadqasimofficial123-max/luna and confirm the remote branch/repository state
 - [x] Fix profile-picture selection/upload/save so the avatar persists to the authenticated user profile and updates across the app
 - [x] Add profile-avatar upload/persistence regression coverage and verify the repaired profile flow with a clean TypeScript check, 40 passing Vitest tests, and a refreshed preview
+- [x] Repair the Messages voice/video call state so status text and controls render as styled React/Tailwind UI instead of unstyled inline content
+- [x] Document that the project already uses React/Tailwind on the frontend and Express/tRPC on the backend; add call-state regression coverage and responsive verification

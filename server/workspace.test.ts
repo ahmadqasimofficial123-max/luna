@@ -3,6 +3,7 @@ import { appRouter } from "./routers";
 import { calculateConversationUnreadCount, isDirectConversationMemberCount, normalizeMemberSearchTerm } from "./db";
 import type { TrpcContext } from "./_core/context";
 import { outgoingMessageStatus } from "../client/src/pages/Messages";
+import { callStatusCopy } from "../client/src/pages/messages-call";
 import { selectConversationAfterInboxRefresh, selectedConversationIsKnown } from "../client/src/pages/messages-selection";
 
 function createContext(): TrpcContext {
@@ -69,6 +70,15 @@ describe("workspace procedure contracts", () => {
   it("keeps outgoing status honest without recipient-read evidence", () => {
     expect(outgoingMessageStatus({ optimistic: true })).toBe("Sending…");
     expect(outgoingMessageStatus({ optimistic: false })).toBe("Sent");
+  });
+
+  it("labels voice and video calls as local previews without claiming remote signaling", () => {
+    expect(callStatusCopy("voice", "Waiz Siddiqui")).toEqual({
+      title: "Local voice preview",
+      detail: "Microphone is active on this device. Remote signaling is not connected, so Waiz Siddiqui has not been invited.",
+    });
+    expect(callStatusCopy("video", "Waiz Siddiqui").detail).toContain("Camera and microphone are active");
+    expect(callStatusCopy("video", "Waiz Siddiqui").detail).toContain("has not been invited");
   });
 
   it("rejects interaction mutations for conversations the user cannot access", async () => {
