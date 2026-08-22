@@ -5,7 +5,7 @@ import type { TrpcContext } from "./_core/context";
 import { outgoingMessageStatus } from "../client/src/pages/messages-status";
 import { callStatusCopy } from "../client/src/pages/messages-call";
 import { selectConversationAfterInboxRefresh, selectedConversationIsKnown } from "../client/src/pages/messages-selection";
-import { realtimeRetryDelay, realtimeStatusLabel, realtimeStreamPath } from "../client/src/pages/messages-realtime";
+import { realtimeRetryDelay, realtimeStatusForAttempt, realtimeStatusForConnectionAttempt, realtimeStatusLabel, realtimeStreamPath } from "../client/src/pages/messages-realtime";
 import { parseConversationId, realtimeAuthorizationStatus, realtimeMessageSignature, serializeRealtimeEvent } from "./realtime";
 
 function createContext(): TrpcContext {
@@ -88,6 +88,12 @@ describe("workspace procedure contracts", () => {
     expect(realtimeStatusLabel("offline")).toContain("polling fallback");
     expect(realtimeRetryDelay(0)).toBe(1000);
     expect(realtimeRetryDelay(99)).toBe(15000);
+    expect(realtimeStatusForAttempt(1)).toBe("reconnecting");
+    expect(realtimeStatusForAttempt(3)).toBe("offline");
+    expect(realtimeStatusForConnectionAttempt(0)).toBe("connecting");
+    expect(realtimeStatusForConnectionAttempt(2)).toBe("reconnecting");
+    expect(realtimeStatusForConnectionAttempt(3)).toBe("offline");
+    expect(realtimeStatusLabel("connected")).toBe("Live");
     expect(realtimeStreamPath(42)).toBe("/api/realtime/messages/42");
     expect(parseConversationId("42")).toBe(42);
     expect(parseConversationId("0")).toBeNull();

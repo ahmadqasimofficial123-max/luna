@@ -137,3 +137,6 @@
 - [ ] Perform signed-in desktop and mobile verification of an authenticated `/messages/:conversationId` view and confirm the realtime status/UI renders in the actual chat screen
 - [x] Add a route-level regression proving an authenticated non-member receives HTTP 403 before the realtime stream opens
 - [x] Run a complete current-code audit covering TypeScript, all Vitest tests, production build, service restart, route smoke checks, and fresh runtime logs; report authenticated-session limits
+- [x] Switch the realtime client to an explicit Offline/polling-fallback state after repeated stream failures, with regression coverage
+- [x] Keep the realtime status persistently Offline once the retry threshold is reached while background reconnect attempts continue and polling fallback remains active
+- [x] Add lifecycle-level realtime state-machine coverage proving repeated failures stay Offline until a real stream reconnect succeeds

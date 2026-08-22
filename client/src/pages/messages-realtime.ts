@@ -26,6 +26,14 @@ export function realtimeRetryDelay(attempt: number) {
   return Math.min(15_000, 1_000 * 2 ** Math.min(attempt, 4));
 }
 
+export function realtimeStatusForAttempt(attempt: number): RealtimeStatus {
+  return attempt >= 3 ? "offline" : "reconnecting";
+}
+
+export function realtimeStatusForConnectionAttempt(attempt: number): RealtimeStatus {
+  return attempt === 0 ? "connecting" : realtimeStatusForAttempt(attempt);
+}
+
 export function realtimeStreamPath(conversationId: number) {
   return `/api/realtime/messages/${conversationId}`;
 }

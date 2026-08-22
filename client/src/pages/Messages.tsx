@@ -9,7 +9,7 @@ import { trpc } from "@/lib/trpc";
 import { uploadMediaFile } from "@/lib/media-upload";
 import { selectConversationAfterInboxRefresh } from "./messages-selection";
 import { callStatusCopy, type CallMode } from "./messages-call";
-import { readConversationStream, realtimeRetryDelay, realtimeStatusLabel, type RealtimeMessage, type RealtimeStatus } from "./messages-realtime";
+import { readConversationStream, realtimeRetryDelay, realtimeStatusForConnectionAttempt, realtimeStatusForAttempt, realtimeStatusLabel, type RealtimeMessage, type RealtimeStatus } from "./messages-realtime";
 import { outgoingMessageStatus } from "./messages-status";
 
 type ChatMessage = { id: number; conversationId: number; senderId: number; body: string; attachmentUrl?: string | null; attachmentType?: "image" | "video" | "voice" | null; createdAt: Date; readAt?: Date | null; optimistic?: boolean; reaction?: string };
@@ -64,7 +64,7 @@ export default function Messages() {
     const connect = () => {
       if (cancelled) return;
       controller = new AbortController();
-      setRealtimeStatus(attempt === 0 ? "connecting" : "reconnecting");
+      setRealtimeStatus(realtimeStatusForConnectionAttempt(attempt));
       void readConversationStream(selectedId, (incoming: RealtimeMessage[]) => {
         if (cancelled) return;
         setRealtimeMessages(incoming.map(message => ({ id: message.id, conversationId: message.conversationId, senderId: message.senderId, body: message.body || "", attachmentUrl: message.attachmentUrl, attachmentType: message.attachmentType, createdAt: new Date(message.createdAt), readAt: message.readAt ? new Date(message.readAt) : null, reaction: message.reaction || undefined })));
@@ -73,7 +73,7 @@ export default function Messages() {
       }, controller.signal).catch(() => {
         if (cancelled) return;
         attempt += 1;
-        setRealtimeStatus("reconnecting");
+        setRealtimeStatus(realtimeStatusForAttempt(attempt));
         retryTimer = window.setTimeout(connect, realtimeRetryDelay(attempt));
       });
     };
