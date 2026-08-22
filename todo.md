@@ -125,3 +125,5 @@
 - [x] Add profile-avatar upload/persistence regression coverage and verify the repaired profile flow with a clean TypeScript check, 40 passing Vitest tests, and a refreshed preview
 - [x] Repair the Messages voice/video call state so status text and controls render as styled React/Tailwind UI instead of unstyled inline content
 - [x] Document that the project already uses React/Tailwind on the frontend and Express/tRPC on the backend; add call-state regression coverage and responsive verification
+- [x] Run a broad release audit covering automated tests, TypeScript/build health, server/browser logs, responsive routes, and main interactive surfaces; document confirmed behavior and environment-dependent limits
+- [x] Document release-audit results: passing TypeScript/Vitest/build checks, verified desktop/mobile routes and HTTP smoke tests, historical-only log errors, and live-session limitations
