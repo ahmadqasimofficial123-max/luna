@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
 import { calculateConversationUnreadCount, isDirectConversationMemberCount, normalizeMemberSearchTerm } from "./db";
 import type { TrpcContext } from "./_core/context";
-import { outgoingMessageStatus } from "../client/src/pages/Messages";
+import { outgoingMessageStatus } from "../client/src/pages/messages-status";
 import { callStatusCopy } from "../client/src/pages/messages-call";
 import { selectConversationAfterInboxRefresh, selectedConversationIsKnown } from "../client/src/pages/messages-selection";
+import { realtimeRetryDelay, realtimeStatusLabel, realtimeStreamPath } from "../client/src/pages/messages-realtime";
+import { parseConversationId, realtimeAuthorizationStatus, realtimeMessageSignature, serializeRealtimeEvent } from "./realtime";
 
 function createContext(): TrpcContext {
   const now = new Date();
@@ -79,6 +81,25 @@ describe("workspace procedure contracts", () => {
     });
     expect(callStatusCopy("video", "Waiz Siddiqui").detail).toContain("Camera and microphone are active");
     expect(callStatusCopy("video", "Waiz Siddiqui").detail).toContain("has not been invited");
+  });
+
+  it("keeps realtime status honest and reconnect delays bounded", () => {
+    expect(realtimeStatusLabel("connected")).toBe("Live");
+    expect(realtimeStatusLabel("offline")).toContain("polling fallback");
+    expect(realtimeRetryDelay(0)).toBe(1000);
+    expect(realtimeRetryDelay(99)).toBe(15000);
+    expect(realtimeStreamPath(42)).toBe("/api/realtime/messages/42");
+    expect(parseConversationId("42")).toBe(42);
+    expect(parseConversationId("0")).toBeNull();
+    expect(realtimeAuthorizationStatus(true)).toBe(200);
+    expect(realtimeAuthorizationStatus(false)).toBe(403);
+  });
+
+  it("serializes conversation events without changing message identity", () => {
+    const event = serializeRealtimeEvent([{ id: 9, conversationId: 42, senderId: 77, body: "hello", createdAt: new Date("2026-08-22T12:00:00Z") }]);
+    expect(event).toContain("event: messages");
+    expect(event).toContain('"conversationId":42');
+    expect(realtimeMessageSignature([{ id: 9, conversationId: 42, senderId: 77, body: "hello", createdAt: new Date("2026-08-22T12:00:00Z") }])).toContain("9|hello");
   });
 
   it("rejects interaction mutations for conversations the user cannot access", async () => {

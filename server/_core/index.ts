@@ -10,6 +10,7 @@ import { createContext } from "./context";
 import { sdk } from "./sdk";
 import { storagePut } from "../storage";
 import { normalizeUploadFilename, mediaUploadErrorResponse, validateMediaUpload } from "../media-upload";
+import { registerRealtimeRoutes } from "../realtime";
 import { serveStatic, setupVite } from "./vite";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -60,6 +61,8 @@ async function startServer() {
       return res.status(failure.statusCode).json({ error: failure.error });
     }
   });
+
+  registerRealtimeRoutes(app);
 
   // tRPC API
   app.use(

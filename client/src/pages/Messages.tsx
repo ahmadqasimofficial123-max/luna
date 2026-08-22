@@ -9,14 +9,12 @@ import { trpc } from "@/lib/trpc";
 import { uploadMediaFile } from "@/lib/media-upload";
 import { selectConversationAfterInboxRefresh } from "./messages-selection";
 import { callStatusCopy, type CallMode } from "./messages-call";
+import { readConversationStream, realtimeRetryDelay, realtimeStatusLabel, type RealtimeMessage, type RealtimeStatus } from "./messages-realtime";
+import { outgoingMessageStatus } from "./messages-status";
 
 type ChatMessage = { id: number; conversationId: number; senderId: number; body: string; attachmentUrl?: string | null; attachmentType?: "image" | "video" | "voice" | null; createdAt: Date; readAt?: Date | null; optimistic?: boolean; reaction?: string };
 type Conversation = { id: number; name: string; username: string; avatar: string; lastMessage: string; time: string; unread: number; online: boolean; group?: boolean; pinned?: boolean };
 type MemberResult = { id: number; name: string | null; displayName: string | null; username: string | null; avatarUrl: string | null; isPrivate: boolean };
-export function outgoingMessageStatus(message: { optimistic?: boolean }) { return message.optimistic ? "Sending…" : "Sent"; }
-
-
-
 function formatTime(value: Date | string) { return new Date(value).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
 
 export default function Messages() {
@@ -34,18 +32,20 @@ export default function Messages() {
   const [reactionById, setReactionById] = useState<Record<number, string>>({});
   const [callMode, setCallMode] = useState<CallMode | null>(null);
   const [callStream, setCallStream] = useState<MediaStream | null>(null);
+  const [realtimeMessages, setRealtimeMessages] = useState<ChatMessage[] | null>(null);
+  const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>("idle");
   const composerRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const inboxQuery = trpc.social.inbox.useQuery(undefined, { enabled: isAuthenticated, refetchInterval: 10000 });
   const memberSearchQuery = trpc.social.memberSearch.useQuery({ query: search.trim() }, { enabled: isAuthenticated && search.trim().length >= 2, staleTime: 20_000 });
   const openConversationMutation = trpc.social.openDirectConversation.useMutation({ onSuccess: async result => { if (result.conversationId > 0) { await selectConversationAfterInboxRefresh({ conversationId: result.conversationId, refreshInbox: () => inboxQuery.refetch(), clearSearch: () => setSearch(""), navigate }); } } });
-  const messagesQuery = trpc.social.messages.useQuery({ conversationId: selectedId || undefined }, { enabled: isAuthenticated && selectedId > 0, refetchInterval: 5000 });
+  const messagesQuery = trpc.social.messages.useQuery({ conversationId: selectedId || undefined }, { enabled: isAuthenticated && selectedId > 0, refetchInterval: realtimeStatus === "connected" ? false : 10000 });
   const sendMutation = trpc.social.sendMessage.useMutation();
   const reactMessageMutation = trpc.social.reactToMessage.useMutation();
   const markReadMutation = trpc.social.markMessagesRead.useMutation();
   const conversations = useMemo<Conversation[]>(() => (inboxQuery.data || []).map(item => ({ id: item.conversation, name: item.member.displayName || item.member.name || "Luna member", username: item.member.username ? `@${item.member.username}` : "Luna member", avatar: item.member.avatarUrl || "https://i.pravatar.cc/120?img=47", lastMessage: item.lastMessage?.body || (item.lastMessage?.attachmentType ? `Sent a ${item.lastMessage.attachmentType}` : "Start a new signal"), time: item.lastMessage ? formatTime(item.lastMessage.createdAt) : "New", unread: item.unreadCount || 0, online: false })), [inboxQuery.data]);
   const selected = conversations.find(item => item.id === selectedId);
-  const serverMessages = useMemo<ChatMessage[]>(() => (messagesQuery.data || []).map(message => ({ id: message.id, conversationId: message.conversationId, senderId: message.senderId, body: message.body || "", attachmentUrl: message.attachmentUrl, attachmentType: message.attachmentType, createdAt: new Date(message.createdAt), readAt: message.readAt ? new Date(message.readAt) : null })), [messagesQuery.data]);
+  const serverMessages = useMemo<ChatMessage[]>(() => (realtimeMessages || messagesQuery.data || []).map(message => ({ id: message.id, conversationId: message.conversationId, senderId: message.senderId, body: message.body || "", attachmentUrl: message.attachmentUrl, attachmentType: message.attachmentType, createdAt: new Date(message.createdAt), readAt: message.readAt ? new Date(message.readAt) : null })), [messagesQuery.data, realtimeMessages]);
   const messages = [...serverMessages, ...localMessages.filter(message => message.conversationId === selectedId && !serverMessages.some(server => server.id === message.id))];
   const visibleConversations = conversations.filter(item => (!search || `${item.name} ${item.username} ${item.lastMessage}`.toLowerCase().includes(search.toLowerCase())) && (filter === "all" || (filter === "unread" ? item.unread > 0 : item.group)));
   const memberResults = (memberSearchQuery.data || []) as MemberResult[];
@@ -54,7 +54,32 @@ export default function Messages() {
   useEffect(() => { setSelectedId(routeConversationId || 0); }, [routeConversationId]);
   useEffect(() => { if (inboxQuery.data && selectedId > 0 && !inboxQuery.data.some(item => item.conversation === selectedId)) { setSelectedId(0); navigate("/messages"); } }, [inboxQuery.data, selectedId, navigate]);
   useEffect(() => { if (!loading && !isAuthenticated) navigate("/welcome"); }, [loading, isAuthenticated, navigate]);
-  useEffect(() => { setLocalMessages([]); setDraft(""); setAttachment(null); }, [selectedId]);
+  useEffect(() => { setLocalMessages([]); setRealtimeMessages(null); setRealtimeStatus(selectedId > 0 ? "connecting" : "idle"); setDraft(""); setAttachment(null); }, [selectedId]);
+  useEffect(() => {
+    if (!isAuthenticated || selectedId <= 0) { setRealtimeStatus("idle"); return; }
+    let cancelled = false;
+    let attempt = 0;
+    let retryTimer: number | undefined;
+    let controller = new AbortController();
+    const connect = () => {
+      if (cancelled) return;
+      controller = new AbortController();
+      setRealtimeStatus(attempt === 0 ? "connecting" : "reconnecting");
+      void readConversationStream(selectedId, (incoming: RealtimeMessage[]) => {
+        if (cancelled) return;
+        setRealtimeMessages(incoming.map(message => ({ id: message.id, conversationId: message.conversationId, senderId: message.senderId, body: message.body || "", attachmentUrl: message.attachmentUrl, attachmentType: message.attachmentType, createdAt: new Date(message.createdAt), readAt: message.readAt ? new Date(message.readAt) : null, reaction: message.reaction || undefined })));
+        setRealtimeStatus("connected");
+        attempt = 0;
+      }, controller.signal).catch(() => {
+        if (cancelled) return;
+        attempt += 1;
+        setRealtimeStatus("reconnecting");
+        retryTimer = window.setTimeout(connect, realtimeRetryDelay(attempt));
+      });
+    };
+    connect();
+    return () => { cancelled = true; controller.abort(); if (retryTimer) window.clearTimeout(retryTimer); };
+  }, [isAuthenticated, selectedId]);
   useEffect(() => { if (selectedId > 0 && messagesQuery.data?.length) void markReadMutation.mutateAsync({ conversationId: selectedId }); }, [selectedId, messagesQuery.data?.length]);
   useEffect(() => () => { callStream?.getTracks().forEach(track => track.stop()); }, [callStream]);
   const startCall = async (mode: "voice" | "video") => { try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: mode === "video" }); setCallStream(stream); setCallMode(mode); toast.info(`${mode === "video" ? "Video" : "Voice"} preview is active on this device. Remote calling needs realtime signaling, so ${selectedConversation.name} has not been invited yet.`); } catch { toast.error(`Allow ${mode === "video" ? "camera and microphone" : "microphone"} access to start the call`); } };
@@ -91,7 +116,7 @@ export default function Messages() {
       <div className="conversation-list">{visibleConversations.map(item => <button type="button" key={item.id} className={`conversation-row ${item.id === selectedId ? "active" : ""}`} onClick={() => selectConversation(item.id)}><div className="conversation-avatar"><img src={item.avatar} alt="" />{item.online && <i />}</div><div className="conversation-copy"><div><strong>{item.name}</strong><small>{item.time}</small></div><p>{item.lastMessage}</p></div>{item.pinned && <Pin size={13} className="conversation-pin" />}{item.unread > 0 && <b className="unread-badge">{item.unread}</b>}</button>)}{!visibleConversations.length && <div className="message-empty-small"><Search size={18} /><p>No conversations match that filter.</p></div>}</div>
     </aside>
     <main className="chat-panel">
-      {selectedId > 0 && <header className="chat-header"><div className="chat-person"><button type="button" className="mobile-back" onClick={() => navigate("/messages")} aria-label="Back to inbox"><ArrowLeft size={18} /></button><div className="conversation-avatar large"><img src={selectedConversation.avatar} alt="" />{selectedConversation.online && <i />}</div><div><h2>{selectedConversation.name}</h2><p>{selectedConversation.online ? "Active now" : "Last seen recently"} · {selectedConversation.username}</p></div></div><div className="chat-actions"><button type="button" aria-label="Search messages" onClick={() => toast.info("Message search is ready for this conversation")}><Search size={18} /></button><button type="button" aria-label="Start voice call" onClick={() => void startCall("voice")}><Phone size={18} /></button><button type="button" aria-label="Start video call" onClick={() => void startCall("video")}><Video size={18} /></button><button type="button" aria-label="More conversation actions" onClick={() => toast.info("Conversation controls opened")}><MoreHorizontal size={18} /></button></div></header>}
+      {selectedId > 0 && <header className="chat-header"><div className="chat-person"><button type="button" className="mobile-back" onClick={() => navigate("/messages")} aria-label="Back to inbox"><ArrowLeft size={18} /></button><div className="conversation-avatar large"><img src={selectedConversation.avatar} alt="" />{selectedConversation.online && <i />}</div><div><h2>{selectedConversation.name}</h2><p>{selectedConversation.online ? "Active now" : "Last seen recently"} · {selectedConversation.username}</p><span className={`realtime-status ${realtimeStatus}`} role="status"><i />{realtimeStatusLabel(realtimeStatus)}</span></div></div><div className="chat-actions"><button type="button" aria-label="Search messages" onClick={() => toast.info("Message search is ready for this conversation")}><Search size={18} /></button><button type="button" aria-label="Start voice call" onClick={() => void startCall("voice")}><Phone size={18} /></button><button type="button" aria-label="Start video call" onClick={() => void startCall("video")}><Video size={18} /></button><button type="button" aria-label="More conversation actions" onClick={() => toast.info("Conversation controls opened")}><MoreHorizontal size={18} /></button></div></header>}
       {callMode && <div className="call-banner" role="status" aria-live="polite"><div className="call-banner-copy"><strong>{callStatusCopy(callMode, selectedConversation.name).title}</strong><span>{callStatusCopy(callMode, selectedConversation.name).detail}</span></div><button type="button" onClick={endCall}><X size={15} /> End preview</button></div>}<section className="chat-messages" aria-live="polite">{!selectedId && <div className="chat-empty"><div className="chat-empty-orb"><Sparkles size={23} /></div><h2>Luna Social Messages</h2><p>Search for a member or choose a conversation to start chatting.</p><Button className="primary-button" onClick={() => { setSearch(""); searchRef.current?.focus(); }}><FilePlus2 size={16} /> New message</Button></div>}{selectedId > 0 && messages.length === 0 && <div className="chat-empty"><div className="chat-empty-orb"><Sparkles size={23} /></div><h2>Start a new signal</h2><p>Say hello to {selectedConversation.name} and keep the orbit moving.</p></div>}{messages.map(message => { const own = message.senderId === user?.id; const reaction = reactionById[message.id] || message.reaction; return <Fragment key={message.id}><div className={`message-line ${own ? "own" : ""}`}><div className="message-bubble" onContextMenu={event => { event.preventDefault(); void addReaction(message.id, "❤️"); }}><p>{message.body}</p>{message.attachmentUrl && (message.attachmentType === "video" ? <video src={message.attachmentUrl} controls className="message-media" /> : message.attachmentType === "voice" ? <audio src={message.attachmentUrl} controls className="message-audio" /> : <img src={message.attachmentUrl} alt="Message attachment" className="message-media" />)}<div className="message-meta"><span>{formatTime(message.createdAt)}</span>{own && <span>{outgoingMessageStatus(message)}</span>}</div>{reaction && <span className="message-reaction">{reaction}</span>}</div><button type="button" className="reaction-button" aria-label="React with heart" onClick={() => void addReaction(message.id, "❤️")}>{reaction || "♡"}</button></div></Fragment>; })}</section>
       <div className="typing-hint"><span /><span /><span /> {selected ? (selected.online ? `${selected.name.split(" ")[0]} is active now` : "Your messages are private") : "Search for a member or select a conversation"}</div>
       {selectedId > 0 && attachment && <div className="attachment-preview"><div><Paperclip size={15} /> {attachment.name}<small>{Math.ceil(attachment.size / 1024)} KB</small></div><button type="button" onClick={() => setAttachment(null)} aria-label="Remove attachment"><X size={15} /></button></div>}

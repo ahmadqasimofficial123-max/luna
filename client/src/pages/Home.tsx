@@ -113,7 +113,7 @@ export default function Home() {
   const [, navigate] = useLocation();
   const { user, loading, isAuthenticated, logout } = useAuth();
   useEffect(() => { if (!loading && !isAuthenticated) navigate("/welcome"); }, [loading, isAuthenticated, navigate]);
-  const [active, setActive] = useState(() => { const workspace = new URLSearchParams(window.location.search).get("workspace"); return workspace === "app-settings" ? "App settings" : workspace || "Home"; });
+  const [active, setActive] = useState(() => { const workspace = new URLSearchParams(window.location.search).get("workspace"); const workspaceMap: Record<string, string> = { "app-settings": "App settings", profile: "Profile", admin: "Admin", settings: "Settings", explore: "Explore", messages: "Messages", notifications: "Notifications", home: "Home" }; return workspaceMap[workspace || ""] || "Home"; });
   const [mobileNav, setMobileNav] = useState(false);
   const [posts, setPosts] = useState(demoPosts);
   const [composerOpen, setComposerOpen] = useState(false);

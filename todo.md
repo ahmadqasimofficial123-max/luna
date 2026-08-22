@@ -118,7 +118,7 @@
 - [x] Ensure profile edits notify accepted followers through targeted notifications without creating unwanted admin notifications
 - [x] Restrict admin actions to the authenticated admin and target only the selected user for admin notifications/role changes
 - [x] Add focused profile/admin regression tests and complete desktop/mobile responsive verification; save a checkpoint and push the complete release to GitHub remain as release steps
-- [ ] Capture direct responsive previews for the Profile and Admin workspace panels if a supported deep-link or authenticated interaction path is available
+- [x] Capture direct responsive previews for the Profile and Admin workspace panels using the supported `?workspace=profile` and `?workspace=admin` deep links at desktop and mobile sizes
 - [x] Save a new checkpoint after the verified profile-update notification and admin-targeting changes
 - [x] Push the verified release to ahmadqasimofficial123-max/luna and confirm the remote branch/repository state
 - [x] Fix profile-picture selection/upload/save so the avatar persists to the authenticated user profile and updates across the app
@@ -131,3 +131,9 @@
 - [ ] Perform signed-in desktop/mobile visual verification of the authenticated admin App settings workspace and confirm the `?workspace=app-settings` deep link for an admin session
 - [x] Narrow the delivered App settings scope documentation to app name, tagline, theme, and accent color
 - [x] Create and verify a production sitemap.xml containing only the public Luna Social route
+- [ ] Perform signed-in desktop/mobile visual verification of the authenticated Profile workspace using `?workspace=profile` and confirm the actual panel renders
+- [ ] Perform signed-in desktop/mobile visual verification of the authenticated Admin workspace using `?workspace=admin` and confirm the actual panel renders
+- [x] Add authenticated SSE realtime message delivery so incoming messages appear without manual refresh, with a reconnect/polling fallback, membership checks, security contracts, clean build/tests, and desktop/mobile chat verification
+- [ ] Perform signed-in desktop and mobile verification of an authenticated `/messages/:conversationId` view and confirm the realtime status/UI renders in the actual chat screen
+- [x] Add a route-level regression proving an authenticated non-member receives HTTP 403 before the realtime stream opens
+- [x] Run a complete current-code audit covering TypeScript, all Vitest tests, production build, service restart, route smoke checks, and fresh runtime logs; report authenticated-session limits

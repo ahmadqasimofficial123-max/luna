@@ -94,3 +94,15 @@ nav { display: grid; gap: 6px; }
 [data-app-theme='system'] { --background: #0c0b12; --foreground: #f7f4ff; --card: #15131e; --card-foreground: #f7f4ff; --popover: #171522; --popover-foreground: #f7f4ff; --primary-foreground: #110d1f; --secondary: #211c2e; --secondary-foreground: #f3efff; --muted: #191722; --muted-foreground: #9b95ac; --accent: #342850; --accent-foreground: #f5f0ff; --border: #292439; --input: #211d2b; --ring: var(--app-accent); }
 @media (prefers-color-scheme: light) { [data-app-theme='system'] { --background: #f7f5fb; --foreground: #211b2c; --card: #ffffff; --card-foreground: #211b2c; --popover: #ffffff; --popover-foreground: #211b2c; --primary-foreground: #ffffff; --secondary: #ece7f5; --secondary-foreground: #2b213a; --muted: #eeeaf4; --muted-foreground: #6e637b; --accent: #e8ddf8; --accent-foreground: #2b213a; --border: #ddd5e8; --input: #ffffff; } }
 @media (max-width: 640px) { .app-settings-panel { padding-inline: 15px; }.app-settings-panel .workspace-heading { flex-direction: column; }.app-settings-grid { grid-template-columns: 1fr; }.app-settings-actions { justify-content: stretch; }.app-settings-actions button { flex: 1; } }
+
+.realtime-status { display: inline-flex; align-items: center; gap: 5px; margin-top: 5px; color: var(--muted-foreground); font-size: 10px; font-weight: 700; letter-spacing: .02em; }
+.realtime-status i { display: inline-block; width: 6px; height: 6px; border-radius: 999px; background: #9b95ac; }
+.realtime-status.connected { color: #82e3b0; }
+.realtime-status.connected i { background: #4ade80; box-shadow: 0 0 0 3px rgba(74, 222, 128, .12); }
+.realtime-status.reconnecting, .realtime-status.connecting { color: #f3c77b; }
+.realtime-status.reconnecting i, .realtime-status.connecting i { background: #f3c77b; animation: realtime-pulse 1.2s ease-in-out infinite; }
+.realtime-status.offline { color: #f19a9a; }
+.realtime-status.offline i { background: #f19a9a; }
+@keyframes realtime-pulse { 50% { opacity: .35; transform: scale(.75); } }
+@media (prefers-reduced-motion: reduce) { .realtime-status i { animation: none; } }
+@media (max-width: 640px) { .realtime-status { font-size: 9px; } }
