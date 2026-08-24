@@ -154,3 +154,4 @@
 - [x] Expand the Games page with the user-supplied unique Poki, web, and itch.io game links, categorize them, and route every card to an internal iframe player
 - [x] Replace the wrapped multi-row game selector with one straight, non-wrapping, horizontally moving game-name marquee and preserve accessible navigation
 - [x] Detect publisher-blocked game iframes and show an in-app fallback message instead of a blank/refused frame, without bypassing publisher security headers
+- [x] Replace generic Games hub gamepad artwork with real cover images for supplied titles using persistent WebDev assets where available
