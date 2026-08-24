@@ -153,3 +153,4 @@
 - [x] Keep requested games in Luna Social iframe pages where supported, add the shared sidebar to game pages, and add the reference-style like/dislike/bookmark/report/comments/game-controls/fullscreen action bar
 - [x] Expand the Games page with the user-supplied unique Poki, web, and itch.io game links, categorize them, and route every card to an internal iframe player
 - [x] Replace the wrapped multi-row game selector with one straight, non-wrapping, horizontally moving game-name marquee and preserve accessible navigation
+- [x] Detect publisher-blocked game iframes and show an in-app fallback message instead of a blank/refused frame, without bypassing publisher security headers

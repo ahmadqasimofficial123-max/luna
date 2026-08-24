@@ -6,6 +6,7 @@ import { useLocation, useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAppSettings } from "@/contexts/AppSettingsContext";
 import { GAME_CONFIGS, HUB_GAMES } from "./game-config";
+import { isKnownBlockedEmbedUrl } from "./game-embed";
 
 export default function GamePage() {
   const [, params] = useRoute<{ gameId: string }>("/games/:gameId");
@@ -19,6 +20,7 @@ export default function GamePage() {
   const [commentOpen, setCommentOpen] = useState(false);
   const allGames = useMemo(() => Array.from(new Map([...Object.values(GAME_CONFIGS), ...HUB_GAMES].map(item => [item.slug, item])).values()), []);
   const game = allGames.find(item => item.slug === params?.gameId) || GAME_CONFIGS.poxel;
+  const knownBlockedEmbed = isKnownBlockedEmbedUrl(game.sourceUrl);
 
   useEffect(() => {
     const onFullscreenChange = () => setIsFullscreen(document.fullscreenElement === iframeRef.current || document.fullscreenElement?.classList.contains("game-frame-shell") === true);
@@ -52,7 +54,7 @@ export default function GamePage() {
       </section>
       <section className="game-frame-shell" style={{ "--game-cover": game.coverUrl ? `url(${game.coverUrl})` : "none" } as React.CSSProperties}>
         <div className="game-frame-toolbar"><div><span className="game-live-dot" /> Browser game</div><Button type="button" className="game-fullscreen-button" onClick={toggleFullscreen}><Maximize2 size={16} /> {isFullscreen ? "Exit fullscreen" : "Fullscreen"}</Button></div>
-        <div className="game-frame-wrap"><iframe ref={iframeRef} title={`${game.title} playable game`} src={game.sourceUrl} allow="fullscreen; autoplay; gamepad; pointer-lock; clipboard-write" allowFullScreen loading="eager" /></div>
+        <div className={`game-frame-wrap ${knownBlockedEmbed ? "has-embed-warning" : ""}`}><iframe ref={iframeRef} title={`${game.title} playable game`} src={game.sourceUrl} allow="fullscreen; autoplay; gamepad; pointer-lock; clipboard-write" allowFullScreen loading="eager" />{knownBlockedEmbed && <div className="game-embed-warning"><div className="game-embed-warning-icon"><ShieldAlert size={24} /></div><h2>This game cannot be embedded here</h2><p>{game.title} is protected by its publisher and refuses to load inside another website.</p><span>Choose another game from the moving row above to keep playing inside Luna Social.</span></div>}</div>
         <div className="game-action-bar" aria-label={`${game.title} actions`}>
           <button type="button" className={liked ? "is-active" : ""} onClick={() => { setLiked(value => !value); setDisliked(false); }} aria-label="Like game" title="Like"><ThumbsUp size={21} /><span>37K</span></button>
           <button type="button" className={disliked ? "is-active" : ""} onClick={() => { setDisliked(value => !value); setLiked(false); }} aria-label="Dislike game" title="Dislike"><ThumbsDown size={21} /></button>
@@ -63,7 +65,7 @@ export default function GamePage() {
           <button type="button" onClick={toggleFullscreen} aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"} title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}><Maximize2 size={21} /></button>
         </div>
         {commentOpen && <div className="game-comment-note">Comments are connected to this game page. Share what you discovered in the player.</div>}
-        <div className="game-frame-foot"><span><ShieldAlert size={15} /> This game stays inside Luna Social in a secure frame. If the original host blocks embedding, the player may not load.</span><span className="game-frame-policy">No external navigation</span></div>
+        <div className="game-frame-foot"><span><ShieldAlert size={15} /> This game stays inside Luna Social in a secure frame. Publisher frame restrictions are respected.</span><span className="game-frame-policy">No external navigation</span></div>
       </section>
     </div>
   </div></GameSidebar>;
