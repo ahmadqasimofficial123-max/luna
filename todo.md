@@ -127,22 +127,23 @@
 - [x] Document that the project already uses React/Tailwind on the frontend and Express/tRPC on the backend; add call-state regression coverage and responsive verification
 - [x] Run a broad release audit covering automated tests, TypeScript/build health, server/browser logs, responsive routes, and main interactive surfaces; document confirmed behavior and environment-dependent limits
 - [x] Document release-audit results: passing TypeScript/Vitest/build checks, verified desktop/mobile routes and HTTP smoke tests, historical-only log errors, and live-session limitations
-- [x] Add an admin-only App settings page to edit persisted app name, tagline, theme, and accent color; apply changes globally with automated tests and a direct preview deep link
-- [ ] Perform signed-in desktop/mobile visual verification of the authenticated admin App settings workspace and confirm the `?workspace=app-settings` deep link for an admin session
-- [x] Narrow the delivered App settings scope documentation to app name, tagline, theme, and accent color
+- [x] Add an admin-only App settings page to edit persisted app name, tagline, theme, accent color, and logo URL; apply changes globally with automated tests and a direct preview deep link
+- [x] Perform signed-in desktop/mobile visual verification of the authenticated admin App settings workspace and confirm the `?workspace=app-settings` deep link for an admin session
+- [x] Document the delivered App settings scope: app name, tagline, theme, accent color, and admin-controlled logo URL
 - [x] Create and verify a production sitemap.xml containing only the public Luna Social route
-- [ ] Perform signed-in desktop/mobile visual verification of the authenticated Profile workspace using `?workspace=profile` and confirm the actual panel renders
-- [ ] Perform signed-in desktop/mobile visual verification of the authenticated Admin workspace using `?workspace=admin` and confirm the actual panel renders
+- [x] Perform signed-in desktop/mobile visual verification of the authenticated Profile workspace using `?workspace=profile` and confirm the actual panel renders
+- [x] Perform signed-in desktop/mobile visual verification of the authenticated Admin workspace using `?workspace=admin` and confirm the actual panel renders
 - [x] Add authenticated SSE realtime message delivery so incoming messages appear without manual refresh, with a reconnect/polling fallback, membership checks, security contracts, clean build/tests, and desktop/mobile chat verification
-- [ ] Perform signed-in desktop and mobile verification of an authenticated `/messages/:conversationId` view and confirm the realtime status/UI renders in the actual chat screen
+- [x] Perform signed-in desktop and mobile verification of an authenticated `/messages/:conversationId` view and confirm the realtime status/UI renders in the actual chat screen
 - [x] Add a route-level regression proving an authenticated non-member receives HTTP 403 before the realtime stream opens
 - [x] Run a complete current-code audit covering TypeScript, all Vitest tests, production build, service restart, route smoke checks, and fresh runtime logs; report authenticated-session limits
 - [x] Switch the realtime client to an explicit Offline/polling-fallback state after repeated stream failures, with regression coverage
 - [x] Keep the realtime status persistently Offline once the retry threshold is reached while background reconnect attempts continue and polling fallback remains active
 - [x] Add lifecycle-level realtime state-machine coverage proving repeated failures stay Offline until a real stream reconnect succeeds
 - [x] Restore the shared sidebar/navigation on the Messages page for desktop while preserving mobile inbox/chat switching, with regression coverage and responsive verification
-- [ ] Refine the AI Agent mobile layout to match the supplied reference with a compact top bar, slide-out history drawer, centered branding, and unclipped composer
-- [ ] Add a persistent sidebar slide/collapse control to every authenticated page, preserving active navigation and mobile drawer behavior
+- [x] Refine the AI Agent mobile layout to match the supplied reference with a compact top bar, slide-out history drawer, centered branding, and unclipped composer
+- [x] Add a persistent sidebar slide/collapse control to every authenticated page, preserving active navigation and mobile drawer behavior
 - [x] Fix post publishing so the exact selected image is uploaded, persisted, previewed, and rendered in the resulting feed post
 - [x] Reset each post’s comment field after submit so the next comment starts empty instead of reusing the last text
 - [x] Deduplicate persisted and optimistic feed posts so the same user post/image appears only once in the feed
+- [x] Restore the Games hub/player routes and conversational AI Agent route in the active revision, with sidebar navigation and responsive verification

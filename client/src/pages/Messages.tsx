@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useRoute } from "wouter";
-import { ArrowLeft, Bell, Check, CheckCheck, Compass, FilePlus2, Home as HomeIcon, Image as ImageIcon, Menu, MessageCircle, Mic, MoreHorizontal, Paperclip, Palette, Phone, Pin, Search, Send, Settings, ShieldCheck, Smile, Sparkles, UserRound, Video, X } from "lucide-react";
+import { ArrowLeft, Bell, Check, CheckCheck, Compass, FilePlus2, Gamepad2, Home as HomeIcon, Image as ImageIcon, Menu, MessageCircle, Mic, MoreHorizontal, Paperclip, Palette, Phone, Pin, Search, Send, Settings, ShieldCheck, Smile, Sparkles, UserRound, Video, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { useAppSettings } from "@/contexts/AppSettingsContext";
 import { trpc } from "@/lib/trpc";
 import { uploadMediaFile } from "@/lib/media-upload";
 import { selectConversationAfterInboxRefresh } from "./messages-selection";
+import { SidebarCollapseButton } from "@/components/SidebarCollapseButton";
 import { callStatusCopy, type CallMode } from "./messages-call";
 import { readConversationStream, realtimeRetryDelay, realtimeStatusForConnectionAttempt, realtimeStatusForAttempt, realtimeStatusLabel, type RealtimeMessage, type RealtimeStatus } from "./messages-realtime";
 import { outgoingMessageStatus } from "./messages-status";
@@ -37,6 +38,8 @@ export default function Messages() {
   const [realtimeMessages, setRealtimeMessages] = useState<ChatMessage[] | null>(null);
   const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>("idle");
   const [mobileNav, setMobileNav] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => typeof window !== "undefined" && window.localStorage.getItem("luna-sidebar-collapsed") === "true");
+  useEffect(() => { window.localStorage.setItem("luna-sidebar-collapsed", String(sidebarCollapsed)); }, [sidebarCollapsed]);
   const composerRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const inboxQuery = trpc.social.inbox.useQuery(undefined, { enabled: isAuthenticated, refetchInterval: 10000 });
@@ -90,8 +93,8 @@ export default function Messages() {
   const selectedConversation = selected || { id: 0, name: "Luna Social", username: "Choose a conversation", avatar: "https://i.pravatar.cc/120?img=32", lastMessage: "", time: "", unread: 0, online: false };
   const profileName = user?.name || "your profile";
   const profileAvatar = user?.avatarUrl || "https://i.pravatar.cc/120?img=32";
-  const navItems = [{ label: "Home", icon: HomeIcon }, { label: "Explore", icon: Compass }, { label: "Messages", icon: MessageCircle }, { label: "Notifications", icon: Bell }, { label: "Profile", icon: UserRound }, ...(user?.role === "admin" ? [{ label: "Admin", icon: ShieldCheck }, { label: "App settings", icon: Palette }] : [])];
-  const navigateWorkspace = (label: string) => { setMobileNav(false); if (label === "Messages") navigate("/messages"); else if (label === "Home") navigate("/"); else navigate(`/?workspace=${encodeURIComponent(label.toLowerCase().replaceAll(" ", "-"))}`); };
+  const navItems = [{ label: "Home", icon: HomeIcon }, { label: "Explore", icon: Compass }, { label: "Games", icon: Gamepad2 }, { label: "AI Agent", icon: Sparkles }, { label: "Messages", icon: MessageCircle }, { label: "Notifications", icon: Bell }, { label: "Profile", icon: UserRound }, ...(user?.role === "admin" ? [{ label: "Admin", icon: ShieldCheck }, { label: "App settings", icon: Palette }] : [])];
+  const navigateWorkspace = (label: string) => { setMobileNav(false); if (label === "Messages") navigate("/messages"); else if (label === "Home") navigate("/"); else if (label === "Games") navigate("/games"); else if (label === "AI Agent") navigate("/ai"); else navigate(`/?workspace=${encodeURIComponent(label.toLowerCase().replaceAll(" ", "-"))}`); };
 
   const selectConversation = (id: number) => { setSelectedId(id); navigate(`/messages/${id}`); };
   const send = async () => {
@@ -115,8 +118,8 @@ export default function Messages() {
 
   if (loading || !isAuthenticated) return <div className="auth-gate"><div className="auth-gate-card"><div className="brand-mark"><Sparkles size={22} /></div><p className="muted">Loading your messages…</p></div></div>;
   return <div className="app-shell messages-app-shell">
-    <aside className={`sidebar ${mobileNav ? "sidebar-open" : ""}`}>
-      <div className="brand"><div className="brand-mark"><Sparkles size={18} /></div><span>{appSettings.appName}</span></div>
+    <aside className={`sidebar ${mobileNav ? "sidebar-open" : ""} ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <div className="brand"><div className="brand-mark"><Sparkles size={18} /></div><span>{appSettings.appName}</span><SidebarCollapseButton collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(current => !current)} /></div>
       <button type="button" className="sidebar-profile" onClick={() => navigateWorkspace("Profile")}><div className="avatar avatar-md"><img src={profileAvatar} alt="" /></div><div><strong>{profileName}</strong><span>@{user?.username || "luna_member"}</span></div><MoreHorizontal size={16} /></button>
       <nav aria-label="Primary navigation">{navItems.map(item => <button type="button" key={item.label} className={item.label === "Messages" ? "nav-item active" : "nav-item"} onClick={() => navigateWorkspace(item.label)}><item.icon size={19} /><span>{item.label}</span>{item.label === "Notifications" && <b className="nav-badge">3</b>}</button>)}</nav>
       <div className="sidebar-bottom"><button type="button" className="nav-item" onClick={() => navigateWorkspace("Settings")}><Settings size={19} /><span>Settings</span></button><button type="button" className="nav-item" onClick={() => { navigateWorkspace("Settings"); toast.info("Privacy controls opened in Settings"); }}><ShieldCheck size={19} /><span>Privacy center</span></button><button type="button" className="logout-link" onClick={() => void logout()}>Log out</button></div>

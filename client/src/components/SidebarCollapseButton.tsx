@@ -4,7 +4,7 @@ export function SidebarCollapseButton({ collapsed, onToggle }: { collapsed: bool
   return (
     <button
       type="button"
-      className="sidebar-collapse-toggle"
+      className="sidebar-toggle"
       onClick={onToggle}
       aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       title={collapsed ? "Expand sidebar" : "Collapse sidebar"}

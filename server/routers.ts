@@ -6,15 +6,25 @@ import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { addComment, createPost, createReport, createStory, findOrCreateDirectConversation, followUser, getFeed, getProfile, getSettings, hideNotification, hidePost, listConversationInbox, searchMembers, listMessages, listNotifications, markMessagesRead, reactToMessage, listReports, listStories, markNotificationRead, muteNotificationType, recordNotificationAction, reactToStory, replyToStory, sendMessage, sharePost, toggleBlock, toggleLike, toggleMute, toggleSave, updateFollowStatus, updateProfile, updateSettings, searchAdminUsers, promoteSelectedUser, getAppSettings, updateAppSettings } from "./db";
 import { storagePut } from "./storage";
+import { invokeLLM } from "./_core/llm";
+import { buildAgentMessages } from "./ai-agent";
 
 const mediaSchema = z.object({ url: z.string().min(1), mediaType: z.enum(["image", "video"]), width: z.number().optional(), height: z.number().optional() });
 const avatarUrlSchema = z.string().min(1).refine(value => value.startsWith("/manus-storage/") || /^https?:\/\//i.test(value), "Avatar URL must be an http(s) or Manus storage URL");
 const appNameSchema = z.string().trim().min(1).max(80);
 const taglineSchema = z.string().trim().min(1).max(180);
 const accentColorSchema = z.string().regex(/^#[0-9a-f]{6}$/i, "Accent color must be a 6-digit hex color");
+const logoUrlSchema = z.string().trim().max(1000).refine(value => value.startsWith("/manus-storage/") || /^https?:\/\//i.test(value), "Logo URL must be an http(s) or Manus storage URL").nullable();
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => { if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" }); return next(); });
 export const appRouter = router({
   system: systemRouter,
+  ai: router({
+    chat: protectedProcedure.input(z.object({ messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().trim().min(1).max(4000) })).min(1).max(20) })).mutation(async ({ ctx, input }) => {
+      const response = await invokeLLM({ messages: buildAgentMessages(ctx.user.displayName || ctx.user.name || "a member", input.messages) });
+      const content = response.choices?.[0]?.message?.content;
+      return { content: typeof content === "string" && content.trim() ? content.trim() : "I’m sorry, I couldn’t generate a response right now." };
+    }),
+  }),
   media: router({
     upload: protectedProcedure.input(z.object({ filename: z.string().min(1).max(180), contentType: z.string().min(1).max(120), data: z.string().min(1).max(8_000_000) })).mutation(async ({ ctx, input }) => {
       const bytes = Buffer.from(input.data, "base64");
@@ -38,7 +48,7 @@ export const appRouter = router({
     reports: protectedProcedure.query(() => listReports()),
     settings: protectedProcedure.query(({ ctx }) => getSettings(ctx.user.id)),
     appSettings: publicProcedure.query(() => getAppSettings()),
-    updateAppSettings: adminProcedure.input(z.object({ appName: appNameSchema.optional(), tagline: taglineSchema.optional(), theme: z.enum(["dark", "light", "system"]).optional(), accentColor: accentColorSchema.optional() }).refine(input => Object.keys(input).length > 0, "At least one app setting is required")).mutation(({ ctx, input }) => updateAppSettings(ctx.user.id, input)),
+    updateAppSettings: adminProcedure.input(z.object({ appName: appNameSchema.optional(), tagline: taglineSchema.optional(), theme: z.enum(["dark", "light", "system"]).optional(), accentColor: accentColorSchema.optional(), logoUrl: logoUrlSchema.optional() }).refine(input => Object.keys(input).length > 0, "At least one app setting is required")).mutation(({ ctx, input }) => updateAppSettings(ctx.user.id, input)),
     updateSettings: protectedProcedure.input(z.object({ discoverable: z.boolean().optional(), allowMessages: z.enum(["everyone", "followers", "none"]).optional(), emailNotifications: z.boolean().optional(), pushNotifications: z.boolean().optional(), theme: z.enum(["dark", "light", "system"]).optional(), twoFactorEnabled: z.boolean().optional() })).mutation(({ ctx, input }) => updateSettings(ctx.user.id, input)),
     inbox: protectedProcedure.query(({ ctx }) => listConversationInbox(ctx.user.id)),
     memberSearch: protectedProcedure.input(z.object({ query: z.string().min(2).max(80) })).query(({ ctx, input }) => searchMembers(ctx.user.id, input.query)),
