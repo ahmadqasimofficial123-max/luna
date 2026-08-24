@@ -160,3 +160,7 @@
 - [x] Replace the blocked Drift Hunters iframe with a playable native Luna Social drift mini-game while preserving other game embeds
 - [x] Redesign AI Agent logo and interface: correct square mark, sidebar access, reference-style composer controls, New chat, and persistent old-chat history
 - [x] Add the full authenticated Luna Social sidebar to the AI Agent page with active AI Agent state, Games access, collapse control, and mobile drawer behavior
+- [x] Match the AI Agent sidebar profile card to the supplied Ahmad Qasim reference with avatar, display name, and @luna_member username
+- [x] Apply the supplied Luna Social logo across the full website and add a persisted admin App settings option to change the global logo
+- [x] Replace the global brand mark with the newly supplied logo and add an admin-only App settings logo upload/change control across all website surfaces
+- [x] Repair the live appSettings `logoUrl` schema mismatch causing Home/settings API query failures, preserve existing settings, and add regression verification

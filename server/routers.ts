@@ -12,6 +12,7 @@ import { buildAgentMessages } from "./ai-agent";
 const mediaSchema = z.object({ url: z.string().min(1), mediaType: z.enum(["image", "video"]), width: z.number().optional(), height: z.number().optional() });
 const avatarUrlSchema = z.string().min(1).refine(value => value.startsWith("/manus-storage/") || /^https?:\/\//i.test(value), "Avatar URL must be an http(s) or Manus storage URL");
 const appNameSchema = z.string().trim().min(1).max(80);
+const logoUrlSchema = z.string().trim().max(1000).refine(value => value.startsWith("/manus-storage/") || /^https?:\/\//i.test(value), "Logo URL must be an http(s) or Manus storage URL").nullable();
 const taglineSchema = z.string().trim().min(1).max(180);
 const accentColorSchema = z.string().regex(/^#[0-9a-f]{6}$/i, "Accent color must be a 6-digit hex color");
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => { if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" }); return next(); });
@@ -49,7 +50,7 @@ export const appRouter = router({
     reports: protectedProcedure.query(() => listReports()),
     settings: protectedProcedure.query(({ ctx }) => getSettings(ctx.user.id)),
     appSettings: publicProcedure.query(() => getAppSettings()),
-    updateAppSettings: adminProcedure.input(z.object({ appName: appNameSchema.optional(), tagline: taglineSchema.optional(), theme: z.enum(["dark", "light", "system"]).optional(), accentColor: accentColorSchema.optional() }).refine(input => Object.keys(input).length > 0, "At least one app setting is required")).mutation(({ ctx, input }) => updateAppSettings(ctx.user.id, input)),
+    updateAppSettings: adminProcedure.input(z.object({ appName: appNameSchema.optional(), tagline: taglineSchema.optional(), theme: z.enum(["dark", "light", "system"]).optional(), accentColor: accentColorSchema.optional(), logoUrl: logoUrlSchema.optional() }).refine(input => Object.keys(input).length > 0, "At least one app setting is required")).mutation(({ ctx, input }) => updateAppSettings(ctx.user.id, input)),
     updateSettings: protectedProcedure.input(z.object({ discoverable: z.boolean().optional(), allowMessages: z.enum(["everyone", "followers", "none"]).optional(), emailNotifications: z.boolean().optional(), pushNotifications: z.boolean().optional(), theme: z.enum(["dark", "light", "system"]).optional(), twoFactorEnabled: z.boolean().optional() })).mutation(({ ctx, input }) => updateSettings(ctx.user.id, input)),
     inbox: protectedProcedure.query(({ ctx }) => listConversationInbox(ctx.user.id)),
     memberSearch: protectedProcedure.input(z.object({ query: z.string().min(2).max(80) })).query(({ ctx, input }) => searchMembers(ctx.user.id, input.query)),

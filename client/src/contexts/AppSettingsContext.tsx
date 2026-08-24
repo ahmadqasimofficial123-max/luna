@@ -2,15 +2,15 @@ import { createContext, useContext, useEffect, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 
 type AppTheme = "dark" | "light" | "system";
-export type AppSettings = { id: number; appName: string; tagline: string; theme: AppTheme; accentColor: string; updatedBy: number | null };
+export type AppSettings = { id: number; appName: string; tagline: string; theme: AppTheme; accentColor: string; logoUrl: string | null; updatedBy: number | null };
 
-const fallbackAppSettings: AppSettings = { id: 1, appName: "Luna Social", tagline: "Find your people under the same sky.", theme: "dark", accentColor: "#a98cff", updatedBy: null };
+const fallbackAppSettings: AppSettings = { id: 1, appName: "Luna Social", tagline: "Find your people under the same sky.", theme: "dark", accentColor: "#a98cff", logoUrl: "/manus-storage/luna-logo_a35d2e32.png", updatedBy: null };
 
 type AppSettingsContextValue = {
   settings: AppSettings;
   isLoading: boolean;
   isSaving: boolean;
-  save: (input: Partial<Pick<AppSettings, "appName" | "tagline" | "theme" | "accentColor">>) => Promise<AppSettings>;
+  save: (input: Partial<Pick<AppSettings, "appName" | "tagline" | "theme" | "accentColor" | "logoUrl">>) => Promise<AppSettings>;
 };
 
 const AppSettingsContext = createContext<AppSettingsContextValue | null>(null);
@@ -22,6 +22,10 @@ function applyAppSettings(settings: AppSettings) {
   root.style.setProperty("--primary", settings.accentColor);
   root.style.setProperty("--ring", settings.accentColor);
   document.title = settings.appName;
+  root.style.setProperty("--app-logo-url", settings.logoUrl ? `url("${settings.logoUrl}")` : "none");
+  let favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+  if (!favicon) { favicon = document.createElement("link"); favicon.rel = "icon"; document.head.appendChild(favicon); }
+  favicon.href = settings.logoUrl || "/manus-storage/luna-logo_a35d2e32.png";
 }
 
 export function AppSettingsProvider({ children }: { children: React.ReactNode }) {
