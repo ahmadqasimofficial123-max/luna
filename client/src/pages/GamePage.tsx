@@ -48,7 +48,7 @@ export default function GamePage() {
     <div className="game-page-content">
       <section className="game-intro">
         <div><p className="eyebrow">{game.eyebrow}</p><h1>{game.title}</h1><p>{game.description}</p></div>
-        <div className="game-nav-pills" aria-label="Choose a game">{gameLinks.map(link => <button type="button" className={link.slug === game.slug ? "active" : ""} key={link.slug} onClick={() => navigate(`/games/${link.slug}`)}>{link.title}</button>)}</div>
+        <div className="game-marquee" aria-label="Choose a game"><div className="game-marquee-track">{[...gameLinks, ...gameLinks].map((link, index) => <button type="button" className={link.slug === game.slug ? "active" : ""} key={`${link.slug}-${index}`} onClick={() => navigate(`/games/${link.slug}`)}>{link.title}</button>)}</div></div>
       </section>
       <section className="game-frame-shell" style={{ "--game-cover": game.coverUrl ? `url(${game.coverUrl})` : "none" } as React.CSSProperties}>
         <div className="game-frame-toolbar"><div><span className="game-live-dot" /> Browser game</div><Button type="button" className="game-fullscreen-button" onClick={toggleFullscreen}><Maximize2 size={16} /> {isFullscreen ? "Exit fullscreen" : "Fullscreen"}</Button></div>
