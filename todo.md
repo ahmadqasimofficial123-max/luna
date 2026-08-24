@@ -134,7 +134,7 @@
 - [x] Perform signed-in desktop/mobile visual verification of the authenticated Profile workspace using `?workspace=profile` and confirm the actual panel renders
 - [x] Perform signed-in desktop/mobile visual verification of the authenticated Admin workspace using `?workspace=admin` and confirm the actual panel renders
 - [x] Add authenticated SSE realtime message delivery so incoming messages appear without manual refresh, with a reconnect/polling fallback, membership checks, security contracts, clean build/tests, and desktop/mobile chat verification
-- [ ] Perform signed-in desktop and mobile verification of an authenticated `/messages/:conversationId` view and confirm the realtime status/UI renders in the actual chat screen
+- [x] Perform signed-in desktop and mobile verification of an authenticated `/messages/:conversationId` view and confirm the realtime status/UI renders in the actual chat screen
 - [x] Add a route-level regression proving an authenticated non-member receives HTTP 403 before the realtime stream opens
 - [x] Run a complete current-code audit covering TypeScript, all Vitest tests, production build, service restart, route smoke checks, and fresh runtime logs; report authenticated-session limits
 - [x] Switch the realtime client to an explicit Offline/polling-fallback state after repeated stream failures, with regression coverage
