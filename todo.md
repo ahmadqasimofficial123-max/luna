@@ -144,3 +144,4 @@
 - [ ] Refine the AI Agent mobile layout to match the supplied reference with a compact top bar, slide-out history drawer, centered branding, and unclipped composer
 - [ ] Add a persistent sidebar slide/collapse control to every authenticated page, preserving active navigation and mobile drawer behavior
 - [x] Fix post publishing so the exact selected image is uploaded, persisted, previewed, and rendered in the resulting feed post
+- [x] Reset each post’s comment field after submit so the next comment starts empty instead of reusing the last text
