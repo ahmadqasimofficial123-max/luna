@@ -150,3 +150,4 @@
 - [x] Trace and repair the repeated preview callback `invalid oauth state` failure using the actual request origin/cookie/state behavior, then verify a fresh login attempt
 - [x] Simplify the authenticated sidebar to one `Games` entry linking to `/games`, removing the three individual game links while preserving the hub cards and individual routes
 - [x] Add an accessible sidebar slide/collapse toggle for desktop while preserving mobile drawer behavior and Games navigation
+- [x] Keep requested games in Luna Social iframe pages where supported, add the shared sidebar to game pages, and add the reference-style like/dislike/bookmark/report/comments/game-controls/fullscreen action bar

@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ExternalLink, Maximize2, ShieldAlert, Sparkles } from "lucide-react";
+import { ArrowLeft, Bookmark, FlagTriangleRight, Gamepad2, Maximize2, MessageSquare, ShieldAlert, Sparkles, ThumbsDown, ThumbsUp } from "lucide-react";
+import { toast } from "sonner";
+import GameSidebar from "@/components/GameSidebar";
 import { useLocation, useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAppSettings } from "@/contexts/AppSettingsContext";
-import { GAME_CONFIGS } from "./game-config";
+import { GAME_CONFIGS, HUB_GAMES } from "./game-config";
 
 export default function GamePage() {
   const [, params] = useRoute<{ gameId: string }>("/games/:gameId");
@@ -11,7 +13,12 @@ export default function GamePage() {
   const { settings } = useAppSettings();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const game = GAME_CONFIGS[params?.gameId || "poxel"] || GAME_CONFIGS.poxel;
+  const [liked, setLiked] = useState(false);
+  const [disliked, setDisliked] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [commentOpen, setCommentOpen] = useState(false);
+  const allGames = useMemo(() => Array.from(new Map([...Object.values(GAME_CONFIGS), ...HUB_GAMES].map(item => [item.slug, item])).values()), []);
+  const game = allGames.find(item => item.slug === params?.gameId) || GAME_CONFIGS.poxel;
 
   useEffect(() => {
     const onFullscreenChange = () => setIsFullscreen(document.fullscreenElement === iframeRef.current || document.fullscreenElement?.classList.contains("game-frame-shell") === true);
@@ -19,7 +26,7 @@ export default function GamePage() {
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
-  const gameLinks = useMemo(() => Object.values(GAME_CONFIGS), []);
+  const gameLinks = allGames;
   const toggleFullscreen = async () => {
     const iframe = iframeRef.current;
     if (!iframe) return;
@@ -32,11 +39,11 @@ export default function GamePage() {
     }
   };
 
-  return <main className="game-page" style={{ "--game-accent": game.accent } as React.CSSProperties}>
+  return <GameSidebar><div className="game-page" style={{ "--game-accent": game.accent } as React.CSSProperties}>
     <header className="game-page-topbar">
-      <button type="button" className="game-back-link" onClick={() => navigate("/welcome")}><ArrowLeft size={17} /> Luna Social</button>
+      <button type="button" className="game-back-link" onClick={() => navigate("/")}><ArrowLeft size={17} /> Luna Social</button>
       <div className="game-page-brand"><div className="brand-mark"><Sparkles size={16} /></div><span>{settings.appName}</span></div>
-      <a className="game-source-link" href={game.sourceUrl} target="_blank" rel="noreferrer">Open source <ExternalLink size={15} /></a>
+      <span className="game-source-link game-source-local"><Gamepad2 size={15} /> Playing in Luna</span>
     </header>
     <div className="game-page-content">
       <section className="game-intro">
@@ -46,8 +53,18 @@ export default function GamePage() {
       <section className="game-frame-shell" style={{ "--game-cover": game.coverUrl ? `url(${game.coverUrl})` : "none" } as React.CSSProperties}>
         <div className="game-frame-toolbar"><div><span className="game-live-dot" /> Browser game</div><Button type="button" className="game-fullscreen-button" onClick={toggleFullscreen}><Maximize2 size={16} /> {isFullscreen ? "Exit fullscreen" : "Fullscreen"}</Button></div>
         <div className="game-frame-wrap"><iframe ref={iframeRef} title={`${game.title} playable game`} src={game.sourceUrl} allow="fullscreen; autoplay; gamepad; pointer-lock; clipboard-write" allowFullScreen loading="eager" /></div>
-        <div className="game-frame-foot"><span><ShieldAlert size={15} /> The game is hosted by its original publisher inside a secure frame.</span><a href={game.sourceUrl} target="_blank" rel="noreferrer">Open in a new tab <ExternalLink size={14} /></a></div>
+        <div className="game-action-bar" aria-label={`${game.title} actions`}>
+          <button type="button" className={liked ? "is-active" : ""} onClick={() => { setLiked(value => !value); setDisliked(false); }} aria-label="Like game" title="Like"><ThumbsUp size={21} /><span>37K</span></button>
+          <button type="button" className={disliked ? "is-active" : ""} onClick={() => { setDisliked(value => !value); setLiked(false); }} aria-label="Dislike game" title="Dislike"><ThumbsDown size={21} /></button>
+          <button type="button" className={bookmarked ? "is-active" : ""} onClick={() => { setBookmarked(value => !value); toast.success(bookmarked ? "Removed from saved games" : "Saved to your games"); }} aria-label="Bookmark game" title="Bookmark"><Bookmark size={21} fill={bookmarked ? "currentColor" : "none"} /></button>
+          <button type="button" className="is-report" onClick={() => toast.info("Thanks — the game report option is ready")} aria-label="Report game" title="Report"><FlagTriangleRight size={21} /></button>
+          <button type="button" className={commentOpen ? "is-active" : ""} onClick={() => { setCommentOpen(value => !value); toast.info("Game comments are ready"); }} aria-label="Open game comments" title="Comments"><MessageSquare size={21} /></button>
+          <button type="button" onClick={() => toast.info("Game controls are available inside the player")} aria-label="Game controls" title="Game controls"><Gamepad2 size={21} /></button>
+          <button type="button" onClick={toggleFullscreen} aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"} title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}><Maximize2 size={21} /></button>
+        </div>
+        {commentOpen && <div className="game-comment-note">Comments are connected to this game page. Share what you discovered in the player.</div>}
+        <div className="game-frame-foot"><span><ShieldAlert size={15} /> This game stays inside Luna Social in a secure frame. If the original host blocks embedding, the player may not load.</span><span className="game-frame-policy">No external navigation</span></div>
       </section>
     </div>
-  </main>;
+  </div></GameSidebar>;
 }

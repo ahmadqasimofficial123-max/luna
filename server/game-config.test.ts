@@ -19,10 +19,10 @@ describe("Luna Social game catalog", () => {
     expect(GAME_CONFIGS.poxel.coverUrl).toBe("/manus-storage/poxel-cover_3dd5a4bc.webp");
   });
 
-  it("lists every requested hub game and preserves publisher links", () => {
+  it("lists every requested hub game for internal iframe playback", () => {
     expect(HUB_GAMES).toHaveLength(7);
     expect(HUB_GAMES.map(game => game.title)).toEqual(["Shell Shockers", "Drift Hunters", "Moto X3M", "ZombsRoyale.io", "Robbery Bob 2", "We Become What We Behold", "Poxel.io"]);
-    expect(HUB_GAMES.filter(game => game.mode === "external")).toHaveLength(5);
+    expect(HUB_GAMES.every(game => game.mode === "embedded")).toBe(true);
     expect(HUB_GAMES.find(game => game.slug === "zombsroyale")?.sourceUrl).toBe("https://zombsroyale.io/");
   });
 });
