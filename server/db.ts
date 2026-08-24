@@ -1,4 +1,5 @@
 import { and, desc, eq, sql } from "drizzle-orm";
+import { asc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { accountSettings, appSettings, blocks, comments, conversationMembers, conversations, follows, likes, messageReads, messageReactions, messages, mutes, notifications, notificationActions, notificationHides, notificationMutes, postHides, postMedia, postShares, posts, reports, saves, stories, storyReactions, storyReplies, users, type InsertUser } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -58,6 +59,14 @@ export async function listStories() { const db = await getDb(); if (!db) return 
 export async function reactToStory(userId: number, storyId: number, reaction: string) { const db = await getDb(); if (!db) return { success: true }; await db.insert(storyReactions).values({ userId, storyId, reaction }).onDuplicateKeyUpdate({ set: { reaction } }); return { success: true }; }
 export async function replyToStory(authorId: number, storyId: number, body: string) { const db = await getDb(); if (!db) return { success: true }; await db.insert(storyReplies).values({ authorId, storyId, body }); return { success: true }; }
 
+export async function listMembersWithRoles(query = "") {
+  const db = await getDb();
+  const normalized = query.trim().toLowerCase();
+  if (!db) return [];
+  const pattern = `%${normalized}%`;
+  return db.select({ id: users.id, name: users.name, username: users.username, displayName: users.displayName, role: users.role, avatarUrl: users.avatarUrl, createdAt: users.createdAt }).from(users).where(normalized ? sql`(LOWER(COALESCE(${users.username}, '')) LIKE ${pattern} OR LOWER(COALESCE(${users.displayName}, '')) LIKE ${pattern} OR LOWER(COALESCE(${users.name}, '')) LIKE ${pattern})` : undefined).orderBy(asc(users.createdAt)).limit(100);
+}
+
 export async function searchAdminUsers(query: string) {
   const db = await getDb();
   const normalized = query.trim().toLowerCase();
@@ -66,12 +75,12 @@ export async function searchAdminUsers(query: string) {
   return db.select({ id: users.id, name: users.name, username: users.username, displayName: users.displayName, role: users.role, avatarUrl: users.avatarUrl }).from(users).where(sql`(LOWER(COALESCE(${users.username}, '')) LIKE ${pattern} OR LOWER(COALESCE(${users.displayName}, '')) LIKE ${pattern} OR LOWER(COALESCE(${users.name}, '')) LIKE ${pattern})`).limit(25);
 }
 
-export async function promoteSelectedUser(actorId: number, targetId: number) {
+export async function promoteSelectedUser(actorId: number, targetId: number, role: "admin" | "user" = "admin") {
   const db = await getDb();
   if (!db || actorId === targetId) return { success: false as const, reason: "invalid_target" as const };
   const [target] = await db.select({ id: users.id, role: users.role }).from(users).where(eq(users.id, targetId)).limit(1);
   if (!target) return { success: false as const, reason: "not_found" as const };
-  await db.update(users).set({ role: "admin" }).where(eq(users.id, targetId));
-  await db.insert(notifications).values(buildAdminPromotionNotification(actorId, targetId));
-  return { success: true as const, userId: targetId };
+  await db.update(users).set({ role }).where(eq(users.id, targetId));
+  if (role === "admin") await db.insert(notifications).values(buildAdminPromotionNotification(actorId, targetId));
+  return { success: true as const, userId: targetId, role };
 }

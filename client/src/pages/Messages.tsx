@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useRoute } from "wouter";
-import { ArrowLeft, Bell, Check, CheckCheck, Compass, FilePlus2, Home as HomeIcon, Image as ImageIcon, Menu, MessageCircle, Mic, MoreHorizontal, Paperclip, Palette, Phone, Pin, Search, Send, Settings, ShieldCheck, Smile, Sparkles, UserRound, Video, X } from "lucide-react";
+import { ArrowLeft, Bell, Check, CheckCheck, Compass, FilePlus2, Gamepad2, Home as HomeIcon, Image as ImageIcon, Menu, MessageCircle, Mic, MoreHorizontal, Paperclip, Palette, Phone, Pin, Search, Send, Settings, ShieldCheck, Smile, Sparkles, UserRound, Video, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,6 +91,7 @@ export default function Messages() {
   const profileName = user?.name || "your profile";
   const profileAvatar = user?.avatarUrl || "https://i.pravatar.cc/120?img=32";
   const navItems = [{ label: "Home", icon: HomeIcon }, { label: "Explore", icon: Compass }, { label: "Messages", icon: MessageCircle }, { label: "Notifications", icon: Bell }, { label: "Profile", icon: UserRound }, ...(user?.role === "admin" ? [{ label: "Admin", icon: ShieldCheck }, { label: "App settings", icon: Palette }] : [])];
+  const gameItems = [{ label: "Poxel.io", slug: "poxel" }, { label: "Friday Night Funkin’", slug: "funkin" }, { label: "We Become What We Behold", slug: "wbwwb" }];
   const navigateWorkspace = (label: string) => { setMobileNav(false); if (label === "Messages") navigate("/messages"); else if (label === "Home") navigate("/"); else navigate(`/?workspace=${encodeURIComponent(label.toLowerCase().replaceAll(" ", "-"))}`); };
 
   const selectConversation = (id: number) => { setSelectedId(id); navigate(`/messages/${id}`); };
@@ -118,7 +119,7 @@ export default function Messages() {
     <aside className={`sidebar ${mobileNav ? "sidebar-open" : ""}`}>
       <div className="brand"><div className="brand-mark"><Sparkles size={18} /></div><span>{appSettings.appName}</span></div>
       <button type="button" className="sidebar-profile" onClick={() => navigateWorkspace("Profile")}><div className="avatar avatar-md"><img src={profileAvatar} alt="" /></div><div className="sidebar-profile-copy"><strong>{profileName}</strong><span>@{user?.username || "luna_member"}</span></div><MoreHorizontal size={16} /></button>
-      <nav aria-label="Primary navigation">{navItems.map(item => <button type="button" key={item.label} className={item.label === "Messages" ? "nav-item active" : "nav-item"} onClick={() => navigateWorkspace(item.label)}><item.icon size={19} /><span>{item.label}</span>{item.label === "Notifications" && <b className="nav-badge">3</b>}</button>)}</nav>
+      <nav aria-label="Primary navigation">{navItems.map(item => <button type="button" key={item.label} className={item.label === "Messages" ? "nav-item active" : "nav-item"} onClick={() => navigateWorkspace(item.label)}><item.icon size={19} /><span>{item.label}</span>{item.label === "Notifications" && <b className="nav-badge">3</b>}</button>)}<span className="nav-section-label">Games</span>{gameItems.map(item => <button type="button" key={item.slug} className="nav-item" onClick={() => { setMobileNav(false); navigate(`/games/${item.slug}`); }}><Gamepad2 size={19} /><span>{item.label}</span></button>)}</nav>
       <div className="sidebar-bottom"><button type="button" className="nav-item" onClick={() => navigateWorkspace("Settings")}><Settings size={19} /><span>Settings</span></button><button type="button" className="nav-item" onClick={() => { navigateWorkspace("Settings"); toast.info("Privacy controls opened in Settings"); }}><ShieldCheck size={19} /><span>Privacy center</span></button><button type="button" className="logout-link" onClick={() => void logout()}>Log out</button></div>
     </aside>
     {mobileNav && <div className="mobile-scrim" onClick={() => setMobileNav(false)} />}

@@ -142,3 +142,6 @@
 - [x] Add lifecycle-level realtime state-machine coverage proving repeated failures stay Offline until a real stream reconnect succeeds
 - [x] Restore the shared sidebar/navigation on the Messages page for desktop while preserving mobile inbox/chat switching, with regression coverage and responsive verification
 - [x] Fix the medium-width collapsed sidebar profile card so user name and username do not clip or wrap, then verify desktop/tablet/mobile rendering
+- [ ] Add a responsive members-and-roles page showing each member as User or Admin, with role changes available only to authenticated admins and covered by backend authorization tests
+- [ ] Add a public Poxel game page embedding https://poxel.io/ in a responsive iframe with a visible fullscreen control, preserving existing routes and documenting any frame restrictions
+- [x] Add a Games sidebar section with separate Poxel, Friday Night Funkin’, and We Become What We Behold pages, responsive embedded players, fullscreen controls, and route/embed verification

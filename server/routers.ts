@@ -4,7 +4,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { addComment, createPost, createReport, createStory, findOrCreateDirectConversation, followUser, getFeed, getProfile, getSettings, hideNotification, hidePost, listConversationInbox, searchMembers, listMessages, listNotifications, markMessagesRead, reactToMessage, listReports, listStories, markNotificationRead, muteNotificationType, recordNotificationAction, reactToStory, replyToStory, sendMessage, sharePost, toggleBlock, toggleLike, toggleMute, toggleSave, updateFollowStatus, updateProfile, updateSettings, searchAdminUsers, promoteSelectedUser, getAppSettings, updateAppSettings } from "./db";
+import { addComment, createPost, createReport, createStory, findOrCreateDirectConversation, followUser, getFeed, getProfile, getSettings, hideNotification, hidePost, listConversationInbox, searchMembers, listMessages, listNotifications, markMessagesRead, reactToMessage, listReports, listStories, markNotificationRead, muteNotificationType, recordNotificationAction, reactToStory, replyToStory, sendMessage, sharePost, toggleBlock, toggleLike, toggleMute, toggleSave, updateFollowStatus, updateProfile, updateSettings, searchAdminUsers, listMembersWithRoles, promoteSelectedUser, getAppSettings, updateAppSettings } from "./db";
 import { storagePut } from "./storage";
 
 const mediaSchema = z.object({ url: z.string().min(1), mediaType: z.enum(["image", "video"]), width: z.number().optional(), height: z.number().optional() });
@@ -61,8 +61,10 @@ export const appRouter = router({
     createStory: protectedProcedure.input(z.object({ mediaUrl: z.string().url(), mediaType: z.enum(["image", "video"]), caption: z.string().max(180).optional() })).mutation(({ ctx, input }) => createStory(ctx.user.id, input.mediaUrl, input.mediaType, input.caption)),
     reactStory: protectedProcedure.input(z.object({ storyId: z.number().int().positive(), reaction: z.string().min(1).max(16) })).mutation(({ ctx, input }) => reactToStory(ctx.user.id, input.storyId, input.reaction)),
     replyStory: protectedProcedure.input(z.object({ storyId: z.number().int().positive(), body: z.string().min(1).max(500) })).mutation(({ ctx, input }) => replyToStory(ctx.user.id, input.storyId, input.body)),
+    memberDirectory: protectedProcedure.input(z.object({ query: z.string().max(80).default("") }).optional()).query(({ input }) => listMembersWithRoles(input?.query || "")),
     adminUsers: adminProcedure.input(z.object({ query: z.string().max(80).default("") })).query(({ input }) => searchAdminUsers(input.query)),
     promoteUser: adminProcedure.input(z.object({ userId: z.number().int().positive() })).mutation(({ ctx, input }) => promoteSelectedUser(ctx.user.id, input.userId)),
+    updateMemberRole: adminProcedure.input(z.object({ userId: z.number().int().positive(), role: z.enum(["admin", "user"]) })).mutation(({ ctx, input }) => { if (ctx.user.id === input.userId) throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot change your own role" }); return promoteSelectedUser(ctx.user.id, input.userId, input.role); }),
   }),
 });
 export type AppRouter = typeof appRouter;
