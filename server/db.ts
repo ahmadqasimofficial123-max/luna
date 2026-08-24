@@ -1,5 +1,4 @@
 import { and, desc, eq, sql } from "drizzle-orm";
-import { asc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { accountSettings, appSettings, blocks, comments, conversationMembers, conversations, follows, likes, messageReads, messageReactions, messages, mutes, notifications, notificationActions, notificationHides, notificationMutes, postHides, postMedia, postShares, posts, reports, saves, stories, storyReactions, storyReplies, users, type InsertUser } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -32,9 +31,9 @@ export async function hidePost(userId: number, postId: number) { const db = awai
 export async function sharePost(userId: number, postId: number) { const db = await getDb(); if (!db) return { success: true }; await db.insert(postShares).values({ userId, postId }); return { success: true }; }
 export async function getSettings(userId: number) { const db = await getDb(); if (!db) return undefined; const existing = await db.select().from(accountSettings).where(eq(accountSettings.userId, userId)).limit(1); if (existing[0]) return existing[0]; await db.insert(accountSettings).values({ userId }); const created = await db.select().from(accountSettings).where(eq(accountSettings.userId, userId)).limit(1); return created[0]; }
 export async function updateSettings(userId: number, input: Partial<typeof accountSettings.$inferInsert>) { const db = await getDb(); if (!db) return; await db.insert(accountSettings).values({ userId, ...input }).onDuplicateKeyUpdate({ set: input }); }
-export const defaultAppSettings = { id: 1, appName: "Luna Social", tagline: "Find your people under the same sky.", theme: "dark" as const, accentColor: "#a98cff", logoUrl: null as string | null, updatedBy: null as number | null };
+export const defaultAppSettings = { id: 1, appName: "Luna Social", tagline: "Find your people under the same sky.", theme: "dark" as const, accentColor: "#a98cff", updatedBy: null as number | null };
 export async function getAppSettings() { const db = await getDb(); if (!db) return defaultAppSettings; const existing = await db.select().from(appSettings).where(eq(appSettings.id, 1)).limit(1); return existing[0] || defaultAppSettings; }
-export async function updateAppSettings(updatedBy: number, input: Partial<Pick<typeof appSettings.$inferInsert, "appName" | "tagline" | "theme" | "accentColor" | "logoUrl">>) { const db = await getDb(); if (!db) return { ...defaultAppSettings, ...input, updatedBy }; await db.insert(appSettings).values({ id: 1, ...input, updatedBy }).onDuplicateKeyUpdate({ set: { ...input, updatedBy } }); return getAppSettings(); }
+export async function updateAppSettings(updatedBy: number, input: Partial<Pick<typeof appSettings.$inferInsert, "appName" | "tagline" | "theme" | "accentColor">>) { const db = await getDb(); if (!db) return { ...defaultAppSettings, ...input, updatedBy }; await db.insert(appSettings).values({ id: 1, ...input, updatedBy }).onDuplicateKeyUpdate({ set: { ...input, updatedBy } }); return getAppSettings(); }
 export const notificationActionLabels: Record<string, string> = { approve: "Approved", decline: "Declined", cancel: "Request canceled", mute: "Muted", hide: "Hidden", read: "Marked as read", report: "Reported" };
 export async function listNotifications(userId: number) { const db = await getDb(); if (!db) return []; const rows = await db.select({ notification: notifications, action: notificationActions.action }).from(notifications).leftJoin(notificationActions, and(eq(notificationActions.notificationId, notifications.id), eq(notificationActions.userId, userId))).where(eq(notifications.recipientId, userId)).orderBy(desc(notifications.createdAt)).limit(40); return rows.map(row => ({ ...row.notification, action: row.action || null, actionLabel: row.action ? notificationActionLabels[row.action] || row.action : null })); }
 export async function recordNotificationAction(userId: number, notificationId: number, action: keyof typeof notificationActionLabels) { const db = await getDb(); if (!db) return { success: true, action }; const notification = await db.select().from(notifications).where(and(eq(notifications.id, notificationId), eq(notifications.recipientId, userId))).limit(1); if (!notification[0]) return { success: false, action }; await db.insert(notificationActions).values({ userId, notificationId, action }).onDuplicateKeyUpdate({ set: { action } }); return { success: true, action }; }
@@ -59,14 +58,6 @@ export async function listStories() { const db = await getDb(); if (!db) return 
 export async function reactToStory(userId: number, storyId: number, reaction: string) { const db = await getDb(); if (!db) return { success: true }; await db.insert(storyReactions).values({ userId, storyId, reaction }).onDuplicateKeyUpdate({ set: { reaction } }); return { success: true }; }
 export async function replyToStory(authorId: number, storyId: number, body: string) { const db = await getDb(); if (!db) return { success: true }; await db.insert(storyReplies).values({ authorId, storyId, body }); return { success: true }; }
 
-export async function listMembersWithRoles(query = "") {
-  const db = await getDb();
-  const normalized = query.trim().toLowerCase();
-  if (!db) return [];
-  const pattern = `%${normalized}%`;
-  return db.select({ id: users.id, name: users.name, username: users.username, displayName: users.displayName, role: users.role, avatarUrl: users.avatarUrl, createdAt: users.createdAt }).from(users).where(normalized ? sql`(LOWER(COALESCE(${users.username}, '')) LIKE ${pattern} OR LOWER(COALESCE(${users.displayName}, '')) LIKE ${pattern} OR LOWER(COALESCE(${users.name}, '')) LIKE ${pattern})` : undefined).orderBy(asc(users.createdAt)).limit(100);
-}
-
 export async function searchAdminUsers(query: string) {
   const db = await getDb();
   const normalized = query.trim().toLowerCase();
@@ -75,12 +66,12 @@ export async function searchAdminUsers(query: string) {
   return db.select({ id: users.id, name: users.name, username: users.username, displayName: users.displayName, role: users.role, avatarUrl: users.avatarUrl }).from(users).where(sql`(LOWER(COALESCE(${users.username}, '')) LIKE ${pattern} OR LOWER(COALESCE(${users.displayName}, '')) LIKE ${pattern} OR LOWER(COALESCE(${users.name}, '')) LIKE ${pattern})`).limit(25);
 }
 
-export async function promoteSelectedUser(actorId: number, targetId: number, role: "admin" | "user" = "admin") {
+export async function promoteSelectedUser(actorId: number, targetId: number) {
   const db = await getDb();
   if (!db || actorId === targetId) return { success: false as const, reason: "invalid_target" as const };
   const [target] = await db.select({ id: users.id, role: users.role }).from(users).where(eq(users.id, targetId)).limit(1);
   if (!target) return { success: false as const, reason: "not_found" as const };
-  await db.update(users).set({ role }).where(eq(users.id, targetId));
-  if (role === "admin") await db.insert(notifications).values(buildAdminPromotionNotification(actorId, targetId));
-  return { success: true as const, userId: targetId, role };
+  await db.update(users).set({ role: "admin" }).where(eq(users.id, targetId));
+  await db.insert(notifications).values(buildAdminPromotionNotification(actorId, targetId));
+  return { success: true as const, userId: targetId };
 }

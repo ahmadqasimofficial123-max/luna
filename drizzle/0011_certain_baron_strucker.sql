@@ -1,1 +1,0 @@
-ALTER TABLE `appSettings` ADD `logoUrl` text;

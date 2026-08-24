@@ -128,40 +128,19 @@
 - [x] Run a broad release audit covering automated tests, TypeScript/build health, server/browser logs, responsive routes, and main interactive surfaces; document confirmed behavior and environment-dependent limits
 - [x] Document release-audit results: passing TypeScript/Vitest/build checks, verified desktop/mobile routes and HTTP smoke tests, historical-only log errors, and live-session limitations
 - [x] Add an admin-only App settings page to edit persisted app name, tagline, theme, and accent color; apply changes globally with automated tests and a direct preview deep link
-- [x] Perform signed-in desktop/mobile visual verification of the authenticated admin App settings workspace and confirm the `?workspace=app-settings` deep link for an admin session
+- [ ] Perform signed-in desktop/mobile visual verification of the authenticated admin App settings workspace and confirm the `?workspace=app-settings` deep link for an admin session
 - [x] Narrow the delivered App settings scope documentation to app name, tagline, theme, and accent color
 - [x] Create and verify a production sitemap.xml containing only the public Luna Social route
-- [x] Perform signed-in desktop/mobile visual verification of the authenticated Profile workspace using `?workspace=profile` and confirm the actual panel renders
-- [x] Perform signed-in desktop/mobile visual verification of the authenticated Admin workspace using `?workspace=admin` and confirm the actual panel renders
+- [ ] Perform signed-in desktop/mobile visual verification of the authenticated Profile workspace using `?workspace=profile` and confirm the actual panel renders
+- [ ] Perform signed-in desktop/mobile visual verification of the authenticated Admin workspace using `?workspace=admin` and confirm the actual panel renders
 - [x] Add authenticated SSE realtime message delivery so incoming messages appear without manual refresh, with a reconnect/polling fallback, membership checks, security contracts, clean build/tests, and desktop/mobile chat verification
-- [x] Perform signed-in desktop and mobile verification of an authenticated `/messages/:conversationId` view and confirm the realtime status/UI renders in the actual chat screen
+- [ ] Perform signed-in desktop and mobile verification of an authenticated `/messages/:conversationId` view and confirm the realtime status/UI renders in the actual chat screen
 - [x] Add a route-level regression proving an authenticated non-member receives HTTP 403 before the realtime stream opens
 - [x] Run a complete current-code audit covering TypeScript, all Vitest tests, production build, service restart, route smoke checks, and fresh runtime logs; report authenticated-session limits
 - [x] Switch the realtime client to an explicit Offline/polling-fallback state after repeated stream failures, with regression coverage
 - [x] Keep the realtime status persistently Offline once the retry threshold is reached while background reconnect attempts continue and polling fallback remains active
 - [x] Add lifecycle-level realtime state-machine coverage proving repeated failures stay Offline until a real stream reconnect succeeds
 - [x] Restore the shared sidebar/navigation on the Messages page for desktop while preserving mobile inbox/chat switching, with regression coverage and responsive verification
-- [x] Fix the medium-width collapsed sidebar profile card so user name and username do not clip or wrap, then verify desktop/tablet/mobile rendering
-- [x] Add a responsive members-and-roles page showing each member as User or Admin, with role changes available only to authenticated admins and covered by backend authorization tests
-- [x] Add a public Poxel game page embedding https://poxel.io/ in a responsive iframe with a visible fullscreen control, preserving existing routes and documenting any frame restrictions
-- [x] Add a Games sidebar section with separate Poxel, Friday Night Funkin’, and We Become What We Behold pages, responsive embedded players, fullscreen controls, and route/embed verification
-- [x] Create a dedicated Games hub page listing Shell Shockers, Drift Hunters, Moto X3M, ZombsRoyale, Robbery Bob 2, We Become What We Behold, and Poxel.io with responsive play/open actions
-- [x] Diagnose and repair the preview login failure showing `invalid oauth state`, preserving nonce-based CSRF validation and adding regression coverage
-- [x] Trace and repair the repeated preview callback `invalid oauth state` failure using the actual request origin/cookie/state behavior, then verify a fresh login attempt
-- [x] Simplify the authenticated sidebar to one `Games` entry linking to `/games`, removing the three individual game links while preserving the hub cards and individual routes
-- [x] Add an accessible sidebar slide/collapse toggle for desktop while preserving mobile drawer behavior and Games navigation
-- [x] Keep requested games in Luna Social iframe pages where supported, add the shared sidebar to game pages, and add the reference-style like/dislike/bookmark/report/comments/game-controls/fullscreen action bar
-- [x] Expand the Games page with the user-supplied unique Poki, web, and itch.io game links, categorize them, and route every card to an internal iframe player
-- [x] Replace the wrapped multi-row game selector with one straight, non-wrapping, horizontally moving game-name marquee and preserve accessible navigation
-- [x] Detect publisher-blocked game iframes and show an in-app fallback message instead of a blank/refused frame, without bypassing publisher security headers
-- [x] Replace generic Games hub gamepad artwork with real cover images for supplied titles using persistent WebDev assets where available
-- [x] Remove unintended blur from non-blocked game cards and verify real cover rendering
-- [x] Enable a real authenticated AI agent chat using the server-side built-in LLM integration, with conversation history and regression coverage
-- [x] Replace the blocked Drift Hunters iframe with a playable native Luna Social drift mini-game while preserving other game embeds
-- [x] Redesign AI Agent logo and interface: correct square mark, sidebar access, reference-style composer controls, New chat, and persistent old-chat history
-- [x] Add the full authenticated Luna Social sidebar to the AI Agent page with active AI Agent state, Games access, collapse control, and mobile drawer behavior
-- [x] Match the AI Agent sidebar profile card to the supplied Ahmad Qasim reference with avatar, display name, and @luna_member username
-- [x] Apply the supplied Luna Social logo across the full website and add a persisted admin App settings option to change the global logo
-- [x] Replace the global brand mark with the newly supplied logo and add an admin-only App settings logo upload/change control across all website surfaces
-- [x] Repair the live appSettings `logoUrl` schema mismatch causing Home/settings API query failures, preserve existing settings, and add regression verification
-- [x] Fix the authenticated `?workspace=members` deep link so the Members & roles panel opens directly, then verify desktop/mobile rendering and tests
+- [ ] Refine the AI Agent mobile layout to match the supplied reference with a compact top bar, slide-out history drawer, centered branding, and unclipped composer
+- [ ] Add a persistent sidebar slide/collapse control to every authenticated page, preserving active navigation and mobile drawer behavior
+- [x] Fix post publishing so the exact selected image is uploaded, persisted, previewed, and rendered in the resulting feed post

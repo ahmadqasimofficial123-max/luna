@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Loader2, Send, User, Sparkles, Plus, Brain, Mic } from "lucide-react";
+import { Loader2, Send, User, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Streamdown } from "streamdown";
 
@@ -57,7 +57,6 @@ export type AIChatBoxProps = {
    * Click to send directly
    */
   suggestedPrompts?: string[];
-  showComposerControls?: boolean;
 };
 
 /**
@@ -120,7 +119,6 @@ export function AIChatBox({
   height = "600px",
   emptyStateMessage = "Start a conversation with AI",
   suggestedPrompts,
-  showComposerControls = false,
 }: AIChatBoxProps) {
   const [input, setInput] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -308,9 +306,8 @@ export function AIChatBox({
       <form
         ref={inputAreaRef}
         onSubmit={handleSubmit}
-        className={cn("flex gap-2 p-4 border-t bg-background/50 items-end", showComposerControls && "ai-reference-composer")}
+        className="flex gap-2 p-4 border-t bg-background/50 items-end"
       >
-        {showComposerControls && <button type="button" className="ai-composer-icon" aria-label="Add attachment" title="Add attachment"><Plus size={22} /></button>}
         <Textarea
           ref={textareaRef}
           value={input}
@@ -320,9 +317,18 @@ export function AIChatBox({
           className="flex-1 max-h-32 resize-none min-h-9"
           rows={1}
         />
-        {showComposerControls && <button type="button" className="ai-composer-think" aria-label="Toggle thinking mode" title="Toggle thinking mode"><Brain size={19} /><span>Think</span></button>}
-        {showComposerControls && <button type="button" className="ai-composer-icon" aria-label="Voice input" title="Voice input"><Mic size={21} /></button>}
-        <Button type="submit" size="icon" disabled={!input.trim() || isLoading} className={cn("shrink-0 h-[38px] w-[38px]", showComposerControls && "ai-composer-send")}>{isLoading ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}</Button>
+        <Button
+          type="submit"
+          size="icon"
+          disabled={!input.trim() || isLoading}
+          className="shrink-0 h-[38px] w-[38px]"
+        >
+          {isLoading ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Send className="size-4" />
+          )}
+        </Button>
       </form>
     </div>
   );

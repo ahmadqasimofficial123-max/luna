@@ -78,13 +78,6 @@
       "when": 1787418758827,
       "tag": "0010_futuristic_loners",
       "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "5",
-      "when": 1787572933118,
-      "tag": "0011_certain_baron_strucker",
-      "breakpoints": true
     }
   ]
 }

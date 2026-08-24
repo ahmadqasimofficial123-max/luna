@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
 const dbMocks = vi.hoisted(() => ({
-  getAppSettings: vi.fn().mockResolvedValue({ id: 1, appName: "Luna Social", tagline: "Find your people under the same sky.", theme: "dark", accentColor: "#a98cff", logoUrl: "/manus-storage/luna-logo_a35d2e32.png", updatedBy: null }),
-  updateAppSettings: vi.fn().mockResolvedValue({ id: 1, appName: "Nightline", tagline: "A calmer place to connect.", theme: "light", accentColor: "#ff7ac8", logoUrl: "/manus-storage/luna-logo_a35d2e32.png", updatedBy: 8 }),
+  getAppSettings: vi.fn().mockResolvedValue({ id: 1, appName: "Luna Social", tagline: "Find your people under the same sky.", theme: "dark", accentColor: "#a98cff", updatedBy: null }),
+  updateAppSettings: vi.fn().mockResolvedValue({ id: 1, appName: "Nightline", tagline: "A calmer place to connect.", theme: "light", accentColor: "#ff7ac8", updatedBy: 8 }),
 }));
 
 vi.mock("./db", () => ({ ...dbMocks }));
@@ -20,8 +20,8 @@ describe("app settings procedures", () => {
     await expect(publicCaller.social.appSettings()).resolves.toMatchObject({ appName: "Luna Social" });
 
     const adminCaller = appRouter.createCaller(context("admin"));
-    await expect(adminCaller.social.updateAppSettings({ appName: "Nightline", tagline: "A calmer place to connect.", theme: "light", accentColor: "#ff7ac8", logoUrl: "/manus-storage/luna-logo_a35d2e32.png" })).resolves.toMatchObject({ appName: "Nightline", logoUrl: "/manus-storage/luna-logo_a35d2e32.png" });
-    expect(dbMocks.updateAppSettings).toHaveBeenCalledWith(8, { appName: "Nightline", tagline: "A calmer place to connect.", theme: "light", accentColor: "#ff7ac8", logoUrl: "/manus-storage/luna-logo_a35d2e32.png" });
+    await expect(adminCaller.social.updateAppSettings({ appName: "Nightline", tagline: "A calmer place to connect.", theme: "light", accentColor: "#ff7ac8" })).resolves.toMatchObject({ appName: "Nightline" });
+    expect(dbMocks.updateAppSettings).toHaveBeenCalledWith(8, { appName: "Nightline", tagline: "A calmer place to connect.", theme: "light", accentColor: "#ff7ac8" });
   });
 
   it("blocks non-admin writes and rejects unsafe or empty patches", async () => {
@@ -30,7 +30,6 @@ describe("app settings procedures", () => {
 
     const adminCaller = appRouter.createCaller(context("admin"));
     await expect(adminCaller.social.updateAppSettings({ accentColor: "red" as never })).rejects.toThrow();
-    await expect(adminCaller.social.updateAppSettings({ logoUrl: "javascript:alert(1)" })).rejects.toThrow();
     await expect(adminCaller.social.updateAppSettings({})).rejects.toThrow();
   });
 });

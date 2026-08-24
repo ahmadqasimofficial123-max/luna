@@ -8,13 +8,9 @@ export const NOT_ADMIN_ERR_MSG = 'You do not have required permission (10002)';
 // it. The `__Host-` prefix forces the cookie host-only (Secure, Path=/, no
 // Domain), so a sibling *.manus.space site cannot plant a matching value in a
 // victim's browser.
-// HTTPS previews and production use the __Host- prefix, which forces a
-// host-only, Secure, Path=/ cookie with no Domain attribute.
-export const OAUTH_STATE_COOKIE = "__Host-oauth_state";
-// Local HTTP development cannot set a __Host- cookie because browsers require
-// Secure for that prefix. The server accepts this fallback only alongside the
-// same nonce/state validation.
-export const OAUTH_STATE_COOKIE_FALLBACK = "oauth_state";
+// Kept host-scoped by omitting Domain; avoid the __Host- prefix because the
+// browser must also support non-HTTPS local development and OAuth redirects.
+export const OAUTH_STATE_COOKIE = "oauth_state";
 
 // `state` carries the callback redirect URI (used at token exchange) plus the
 // CSRF nonce. Defined here so the client encoder and server decoder never drift.
