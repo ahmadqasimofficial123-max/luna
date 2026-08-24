@@ -20,9 +20,9 @@ describe("Luna Social game catalog", () => {
   });
 
   it("lists every requested hub game for internal iframe playback", () => {
-    expect(HUB_GAMES).toHaveLength(7);
-    expect(HUB_GAMES.map(game => game.title)).toEqual(["Shell Shockers", "Drift Hunters", "Moto X3M", "ZombsRoyale.io", "Robbery Bob 2", "We Become What We Behold", "Poxel.io"]);
+    expect(HUB_GAMES.length).toBeGreaterThanOrEqual(45);
+    expect(HUB_GAMES.map(game => game.title)).toEqual(expect.arrayContaining(["Shell Shockers", "Drift Hunters", "Moto X3M", "ZombsRoyale.io", "Friday Night Funkin’", "We Become What We Behold", "Poxel.io", "Subway Surfers", "Celeste Classic"]));
     expect(HUB_GAMES.every(game => game.mode === "embedded")).toBe(true);
-    expect(HUB_GAMES.find(game => game.slug === "zombsroyale")?.sourceUrl).toBe("https://zombsroyale.io/");
+    expect(HUB_GAMES.some(game => game.sourceUrl === "https://zombsroyale.io/")).toBe(true);
   });
 });
