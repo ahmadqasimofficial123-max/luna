@@ -159,3 +159,4 @@
 - [x] Enable a real authenticated AI agent chat using the server-side built-in LLM integration, with conversation history and regression coverage
 - [x] Replace the blocked Drift Hunters iframe with a playable native Luna Social drift mini-game while preserving other game embeds
 - [x] Redesign AI Agent logo and interface: correct square mark, sidebar access, reference-style composer controls, New chat, and persistent old-chat history
+- [x] Add the full authenticated Luna Social sidebar to the AI Agent page with active AI Agent state, Games access, collapse control, and mobile drawer behavior
