@@ -128,11 +128,11 @@
 - [x] Run a broad release audit covering automated tests, TypeScript/build health, server/browser logs, responsive routes, and main interactive surfaces; document confirmed behavior and environment-dependent limits
 - [x] Document release-audit results: passing TypeScript/Vitest/build checks, verified desktop/mobile routes and HTTP smoke tests, historical-only log errors, and live-session limitations
 - [x] Add an admin-only App settings page to edit persisted app name, tagline, theme, and accent color; apply changes globally with automated tests and a direct preview deep link
-- [ ] Perform signed-in desktop/mobile visual verification of the authenticated admin App settings workspace and confirm the `?workspace=app-settings` deep link for an admin session
+- [x] Perform signed-in desktop/mobile visual verification of the authenticated admin App settings workspace and confirm the `?workspace=app-settings` deep link for an admin session
 - [x] Narrow the delivered App settings scope documentation to app name, tagline, theme, and accent color
 - [x] Create and verify a production sitemap.xml containing only the public Luna Social route
-- [ ] Perform signed-in desktop/mobile visual verification of the authenticated Profile workspace using `?workspace=profile` and confirm the actual panel renders
-- [ ] Perform signed-in desktop/mobile visual verification of the authenticated Admin workspace using `?workspace=admin` and confirm the actual panel renders
+- [x] Perform signed-in desktop/mobile visual verification of the authenticated Profile workspace using `?workspace=profile` and confirm the actual panel renders
+- [x] Perform signed-in desktop/mobile visual verification of the authenticated Admin workspace using `?workspace=admin` and confirm the actual panel renders
 - [x] Add authenticated SSE realtime message delivery so incoming messages appear without manual refresh, with a reconnect/polling fallback, membership checks, security contracts, clean build/tests, and desktop/mobile chat verification
 - [ ] Perform signed-in desktop and mobile verification of an authenticated `/messages/:conversationId` view and confirm the realtime status/UI renders in the actual chat screen
 - [x] Add a route-level regression proving an authenticated non-member receives HTTP 403 before the realtime stream opens
@@ -142,8 +142,8 @@
 - [x] Add lifecycle-level realtime state-machine coverage proving repeated failures stay Offline until a real stream reconnect succeeds
 - [x] Restore the shared sidebar/navigation on the Messages page for desktop while preserving mobile inbox/chat switching, with regression coverage and responsive verification
 - [x] Fix the medium-width collapsed sidebar profile card so user name and username do not clip or wrap, then verify desktop/tablet/mobile rendering
-- [ ] Add a responsive members-and-roles page showing each member as User or Admin, with role changes available only to authenticated admins and covered by backend authorization tests
-- [ ] Add a public Poxel game page embedding https://poxel.io/ in a responsive iframe with a visible fullscreen control, preserving existing routes and documenting any frame restrictions
+- [x] Add a responsive members-and-roles page showing each member as User or Admin, with role changes available only to authenticated admins and covered by backend authorization tests
+- [x] Add a public Poxel game page embedding https://poxel.io/ in a responsive iframe with a visible fullscreen control, preserving existing routes and documenting any frame restrictions
 - [x] Add a Games sidebar section with separate Poxel, Friday Night Funkin’, and We Become What We Behold pages, responsive embedded players, fullscreen controls, and route/embed verification
 - [x] Create a dedicated Games hub page listing Shell Shockers, Drift Hunters, Moto X3M, ZombsRoyale, Robbery Bob 2, We Become What We Behold, and Poxel.io with responsive play/open actions
 - [x] Diagnose and repair the preview login failure showing `invalid oauth state`, preserving nonce-based CSRF validation and adding regression coverage
@@ -164,3 +164,4 @@
 - [x] Apply the supplied Luna Social logo across the full website and add a persisted admin App settings option to change the global logo
 - [x] Replace the global brand mark with the newly supplied logo and add an admin-only App settings logo upload/change control across all website surfaces
 - [x] Repair the live appSettings `logoUrl` schema mismatch causing Home/settings API query failures, preserve existing settings, and add regression verification
+- [x] Fix the authenticated `?workspace=members` deep link so the Members & roles panel opens directly, then verify desktop/mobile rendering and tests

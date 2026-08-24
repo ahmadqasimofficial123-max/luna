@@ -178,3 +178,19 @@ nav { display: grid; gap: 6px; }
 /* Global brand mark: use the persisted App settings logo without stretching it. */
 .brand-mark { background-image:var(--app-logo-url, url('/manus-storage/luna-logo_a35d2e32.png')); background-repeat:no-repeat; background-position:center; background-size:contain; }
 .brand-mark > svg { opacity:0; }
+.members-panel { display:grid; gap:16px; max-width:860px; padding:28px clamp(18px,5vw,64px) 56px; }
+.members-panel .workspace-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
+.members-panel .workspace-heading h2 { margin:5px 0 6px; font:600 24px 'Space Grotesk'; }
+.members-panel .workspace-heading p { margin:0; color:var(--muted-foreground); font-size:13px; line-height:1.5; }
+.member-directory-toolbar .search-box { width:min(520px,100%); }
+.member-directory-list { display:grid; gap:10px; }
+.member-directory-row { display:flex; align-items:center; gap:13px; padding:14px 16px; border:1px solid #292239; border-radius:15px; background:#14121c; color:#f5effe; }
+.member-directory-copy { min-width:0; display:grid; gap:4px; flex:1; }
+.member-directory-copy strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.member-directory-copy span { color:#92899f; font-size:11px; }
+.role-pill { flex:none; padding:5px 9px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+.role-pill-admin { color:#d7bdff; background:#39245b; border:1px solid #7750b8; }
+.role-pill-user { color:#bdb4c8; background:#25202d; border:1px solid #40374c; }
+.member-role-select { flex:none; min-width:92px; padding:8px 10px; border:1px solid #40374c; border-radius:9px; background:#211a2c; color:#f5effe; font-size:12px; }
+.member-directory-row:hover { border-color:#61419a; background:#1b1627; }
+@media (max-width:640px) { .members-panel { padding:22px 15px 48px; }.members-panel .workspace-heading { flex-direction:column; }.member-directory-row { align-items:flex-start; flex-wrap:wrap; }.member-directory-copy { flex:1 1 calc(100% - 60px); }.role-pill { margin-left:60px; }.member-role-select { margin-left:auto; } }
