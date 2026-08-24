@@ -5,7 +5,7 @@ import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { uploadMediaFile } from "@/lib/media-upload";
 import { useAppSettings } from "@/contexts/AppSettingsContext";
-import { resolvePublishedPostId, resolvePublishedPostMediaUrl } from "@/pages/post-media";
+import { dedupeById, resolvePublishedPostId, resolvePublishedPostMediaUrl } from "@/pages/post-media";
 import { clearCommentDraft, nextCommentInputKey } from "@/pages/comment-composer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -154,7 +154,7 @@ export default function Home() {
   const profileName = user?.name || "your profile";
   const profileAvatar = user?.avatarUrl || "https://i.pravatar.cc/120?img=32";
   const { settings: appSettings } = useAppSettings();
-  useEffect(() => { if (feedQuery.data?.length) setPosts(feedQuery.data.map((entry, index) => ({ id: entry.post.id, authorId: entry.post.authorId, name: entry.author.name || "Luna member", handle: entry.author.username || `member_${entry.post.authorId}`, avatar: entry.author.avatarUrl || `https://i.pravatar.cc/120?img=${47 - (index % 8)}`, image: entry.media?.url || demoPosts[index % demoPosts.length].image, caption: entry.post.caption || "", likes: 0, comments: 0, liked: false, saved: false, time: new Date(entry.post.createdAt).toLocaleDateString() }))); }, [feedQuery.data]);
+  useEffect(() => { if (feedQuery.data?.length) setPosts(dedupeById(feedQuery.data.map((entry, index) => ({ id: entry.post.id, authorId: entry.post.authorId, name: entry.author.name || "Luna member", handle: entry.author.username || `member_${entry.post.authorId}`, avatar: entry.author.avatarUrl || `https://i.pravatar.cc/120?img=${47 - (index % 8)}`, image: entry.media?.url || demoPosts[index % demoPosts.length].image, caption: entry.post.caption || "", likes: 0, comments: 0, liked: false, saved: false, time: new Date(entry.post.createdAt).toLocaleDateString() })))); }, [feedQuery.data]);
   const persistedStories = useMemo(() => { const items = storiesQuery.data?.length ? storiesQuery.data.map(entry => ({ id: entry.story.id, name: entry.author.name || "Luna member", avatar: entry.author.avatarUrl || "https://i.pravatar.cc/120?img=47", expiresAt: new Date(entry.story.expiresAt).getTime(), mediaUrl: entry.story.mediaUrl, own: entry.story.authorId === user?.id })) : storyItems; return items.map(item => item.own ? { ...item, avatar: profileAvatar } : item); }, [storiesQuery.data, storyItems, user?.id, profileAvatar]);
   const shownPosts = useMemo(() => posts.filter(p => !hiddenPosts.includes(p.id) && !mutedCreators.includes(p.handle) && (!search || `${p.name} ${p.handle} ${p.caption}`.toLowerCase().includes(search.toLowerCase()))), [posts, search, hiddenPosts, mutedCreators]);
 

@@ -145,3 +145,4 @@
 - [ ] Add a persistent sidebar slide/collapse control to every authenticated page, preserving active navigation and mobile drawer behavior
 - [x] Fix post publishing so the exact selected image is uploaded, persisted, previewed, and rendered in the resulting feed post
 - [x] Reset each post’s comment field after submit so the next comment starts empty instead of reusing the last text
+- [x] Deduplicate persisted and optimistic feed posts so the same user post/image appears only once in the feed

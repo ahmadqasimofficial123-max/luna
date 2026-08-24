@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolvePublishedPostId, resolvePublishedPostMediaUrl } from "../client/src/pages/post-media";
+import { dedupeById, resolvePublishedPostId, resolvePublishedPostMediaUrl } from "../client/src/pages/post-media";
 
 describe("published post media contract", () => {
   it("keeps the exact uploaded URL instead of a fallback image", () => {
@@ -13,6 +13,10 @@ describe("published post media contract", () => {
   it("prefers the persisted post ID over a temporary optimistic ID", () => {
     expect(resolvePublishedPostId(42, 999)).toBe(42);
     expect(resolvePublishedPostId(undefined, 999)).toBe(999);
+  });
+
+  it("renders each persisted post ID only once", () => {
+    expect(dedupeById([{ id: 7, image: "first" }, { id: 7, image: "duplicate" }, { id: 8, image: "second" }])).toEqual([{ id: 7, image: "first" }, { id: 8, image: "second" }]);
   });
 });
 
