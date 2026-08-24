@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { validateOAuthState } from "./_core/oauth";
-import { OAUTH_STATE_COOKIE, encodeOAuthState } from "../shared/const";
+import { OAUTH_STATE_COOKIE, OAUTH_STATE_COOKIE_FALLBACK, encodeOAuthState } from "../shared/const";
 
 describe("OAuth callback state validation", () => {
   const state = encodeOAuthState({
@@ -13,11 +13,18 @@ describe("OAuth callback state validation", () => {
     expect(validateOAuthState(req, state)).toBe(true);
   });
 
+  it("accepts the local HTTP fallback cookie with the same nonce", () => {
+    const req = { headers: { cookie: `${OAUTH_STATE_COOKIE_FALLBACK}=nonce-456` } } as never;
+    expect(validateOAuthState(req, state)).toBe(true);
+  });
+
   it("rejects a callback when the browser cookie is missing or mismatched", () => {
     const missing = { headers: {} } as never;
     const mismatched = { headers: { cookie: `${OAUTH_STATE_COOKIE}=other` } } as never;
+    const fallbackMismatch = { headers: { cookie: `${OAUTH_STATE_COOKIE_FALLBACK}=other` } } as never;
 
     expect(validateOAuthState(missing, state)).toBe(false);
     expect(validateOAuthState(mismatched, state)).toBe(false);
+    expect(validateOAuthState(fallbackMismatch, state)).toBe(false);
   });
 });

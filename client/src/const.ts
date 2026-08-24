@@ -1,4 +1,4 @@
-import { OAUTH_STATE_COOKIE, encodeOAuthState } from "@shared/const";
+import { OAUTH_STATE_COOKIE, OAUTH_STATE_COOKIE_FALLBACK, encodeOAuthState } from "@shared/const";
 
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
@@ -18,8 +18,10 @@ export const startLogin = () => {
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
 
   const nonce = crypto.randomUUID();
-  const secure = window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${OAUTH_STATE_COOKIE}=${nonce}; Path=/; Max-Age=600; SameSite=Lax${secure}`;
+  const isHttps = window.location.protocol === "https:";
+  const stateCookieName = isHttps ? OAUTH_STATE_COOKIE : OAUTH_STATE_COOKIE_FALLBACK;
+  const cookieAttributes = isHttps ? "; Path=/; Max-Age=600; SameSite=None; Secure" : "; Path=/; Max-Age=600; SameSite=Lax";
+  document.cookie = `${stateCookieName}=${nonce}${cookieAttributes}`;
   const state = encodeOAuthState({ redirectUri, nonce });
 
   const url = new URL(`${oauthPortalUrl}/app-auth`);
