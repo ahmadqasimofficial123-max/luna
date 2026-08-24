@@ -92,8 +92,8 @@ export default function Messages() {
   const selectedConversation = selected || { id: 0, name: "Luna Social", username: "Choose a conversation", avatar: "https://i.pravatar.cc/120?img=32", lastMessage: "", time: "", unread: 0, online: false };
   const profileName = user?.name || "your profile";
   const profileAvatar = user?.avatarUrl || "https://i.pravatar.cc/120?img=32";
-  const navItems = [{ label: "Home", icon: HomeIcon }, { label: "Explore", icon: Compass }, { label: "Messages", icon: MessageCircle }, { label: "Notifications", icon: Bell }, { label: "Profile", icon: UserRound }, ...(user?.role === "admin" ? [{ label: "Admin", icon: ShieldCheck }, { label: "App settings", icon: Palette }] : [])];
-  const navigateWorkspace = (label: string) => { setMobileNav(false); if (label === "Messages") navigate("/messages"); else if (label === "Home") navigate("/"); else navigate(`/?workspace=${encodeURIComponent(label.toLowerCase().replaceAll(" ", "-"))}`); };
+  const navItems = [{ label: "Home", icon: HomeIcon }, { label: "Explore", icon: Compass }, { label: "AI Agent", icon: Sparkles }, { label: "Messages", icon: MessageCircle }, { label: "Notifications", icon: Bell }, { label: "Profile", icon: UserRound }, ...(user?.role === "admin" ? [{ label: "Admin", icon: ShieldCheck }, { label: "App settings", icon: Palette }] : [])];
+  const navigateWorkspace = (label: string) => { setMobileNav(false); if (label === "Messages") navigate("/messages"); else if (label === "AI Agent") navigate("/ai"); else if (label === "Home") navigate("/"); else navigate(`/?workspace=${encodeURIComponent(label.toLowerCase().replaceAll(" ", "-"))}`); };
 
   const selectConversation = (id: number) => { setSelectedId(id); navigate(`/messages/${id}`); };
   const send = async () => {

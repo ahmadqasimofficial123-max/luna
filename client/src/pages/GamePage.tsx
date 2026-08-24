@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAppSettings } from "@/contexts/AppSettingsContext";
 import { GAME_CONFIGS, HUB_GAMES } from "./game-config";
 import { isKnownBlockedEmbedUrl } from "./game-embed";
+import NativeDriftGame from "@/components/NativeDriftGame";
 
 export default function GamePage() {
   const [, params] = useRoute<{ gameId: string }>("/games/:gameId");
@@ -20,7 +21,8 @@ export default function GamePage() {
   const [commentOpen, setCommentOpen] = useState(false);
   const allGames = useMemo(() => Array.from(new Map([...Object.values(GAME_CONFIGS), ...HUB_GAMES].map(item => [item.slug, item])).values()), []);
   const game = allGames.find(item => item.slug === params?.gameId) || GAME_CONFIGS.poxel;
-  const knownBlockedEmbed = isKnownBlockedEmbedUrl(game.sourceUrl);
+  const isNativeDrift = game.title === "Drift Hunters";
+  const knownBlockedEmbed = !isNativeDrift && isKnownBlockedEmbedUrl(game.sourceUrl);
 
   useEffect(() => {
     const onFullscreenChange = () => setIsFullscreen(document.fullscreenElement === iframeRef.current || document.fullscreenElement?.classList.contains("game-frame-shell") === true);
@@ -31,6 +33,7 @@ export default function GamePage() {
   const gameLinks = allGames;
   const toggleFullscreen = async () => {
     const iframe = iframeRef.current;
+    if (isNativeDrift) { const shell = document.querySelector(".native-drift-game"); if (shell instanceof HTMLElement && !document.fullscreenElement) await shell.requestFullscreen(); else if (document.fullscreenElement) await document.exitFullscreen(); return; }
     if (!iframe) return;
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
@@ -54,7 +57,7 @@ export default function GamePage() {
       </section>
       <section className="game-frame-shell" style={{ "--game-cover": game.coverUrl ? `url(${game.coverUrl})` : "none" } as React.CSSProperties}>
         <div className="game-frame-toolbar"><div><span className="game-live-dot" /> Browser game</div><Button type="button" className="game-fullscreen-button" onClick={toggleFullscreen}><Maximize2 size={16} /> {isFullscreen ? "Exit fullscreen" : "Fullscreen"}</Button></div>
-        <div className={`game-frame-wrap ${knownBlockedEmbed ? "has-embed-warning" : ""}`}><iframe ref={iframeRef} title={`${game.title} playable game`} src={game.sourceUrl} allow="fullscreen; autoplay; gamepad; pointer-lock; clipboard-write" allowFullScreen loading="eager" />{knownBlockedEmbed && <div className="game-embed-warning"><div className="game-embed-warning-icon"><ShieldAlert size={24} /></div><h2>This game cannot be embedded here</h2><p>{game.title} is protected by its publisher and refuses to load inside another website.</p><span>Choose another game from the moving row above to keep playing inside Luna Social.</span></div>}</div>
+        <div className={`game-frame-wrap ${knownBlockedEmbed ? "has-embed-warning" : ""}`}>{isNativeDrift ? <NativeDriftGame /> : <><iframe ref={iframeRef} title={`${game.title} playable game`} src={game.sourceUrl} allow="fullscreen; autoplay; gamepad; pointer-lock; clipboard-write" allowFullScreen loading="eager" />{knownBlockedEmbed && <div className="game-embed-warning"><div className="game-embed-warning-icon"><ShieldAlert size={24} /></div><h2>This game cannot be embedded here</h2><p>{game.title} is protected by its publisher and refuses to load inside another website.</p><span>Choose another game from the moving row above to keep playing inside Luna Social.</span></div>}</>}</div>
         <div className="game-action-bar" aria-label={`${game.title} actions`}>
           <button type="button" className={liked ? "is-active" : ""} onClick={() => { setLiked(value => !value); setDisliked(false); }} aria-label="Like game" title="Like"><ThumbsUp size={21} /><span>37K</span></button>
           <button type="button" className={disliked ? "is-active" : ""} onClick={() => { setDisliked(value => !value); setLiked(false); }} aria-label="Dislike game" title="Dislike"><ThumbsDown size={21} /></button>

@@ -155,3 +155,6 @@
 - [x] Replace the wrapped multi-row game selector with one straight, non-wrapping, horizontally moving game-name marquee and preserve accessible navigation
 - [x] Detect publisher-blocked game iframes and show an in-app fallback message instead of a blank/refused frame, without bypassing publisher security headers
 - [x] Replace generic Games hub gamepad artwork with real cover images for supplied titles using persistent WebDev assets where available
+- [x] Remove unintended blur from non-blocked game cards and verify real cover rendering
+- [x] Enable a real authenticated AI agent chat using the server-side built-in LLM integration, with conversation history and regression coverage
+- [x] Replace the blocked Drift Hunters iframe with a playable native Luna Social drift mini-game while preserving other game embeds
