@@ -145,3 +145,4 @@
 - [ ] Add a responsive members-and-roles page showing each member as User or Admin, with role changes available only to authenticated admins and covered by backend authorization tests
 - [ ] Add a public Poxel game page embedding https://poxel.io/ in a responsive iframe with a visible fullscreen control, preserving existing routes and documenting any frame restrictions
 - [x] Add a Games sidebar section with separate Poxel, Friday Night Funkin’, and We Become What We Behold pages, responsive embedded players, fullscreen controls, and route/embed verification
+- [x] Create a dedicated Games hub page listing Shell Shockers, Drift Hunters, Moto X3M, ZombsRoyale, Robbery Bob 2, We Become What We Behold, and Poxel.io with responsive play/open actions

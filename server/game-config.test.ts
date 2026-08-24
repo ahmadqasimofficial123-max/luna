@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GAME_CONFIGS } from "../client/src/pages/game-config";
+import { GAME_CONFIGS, HUB_GAMES } from "../client/src/pages/game-config";
 
 describe("Luna Social game catalog", () => {
   it("contains the three requested standalone game destinations", () => {
@@ -17,5 +17,12 @@ describe("Luna Social game catalog", () => {
 
   it("uses the uploaded Poxel cover asset", () => {
     expect(GAME_CONFIGS.poxel.coverUrl).toBe("/manus-storage/poxel-cover_3dd5a4bc.webp");
+  });
+
+  it("lists every requested hub game and preserves publisher links", () => {
+    expect(HUB_GAMES).toHaveLength(7);
+    expect(HUB_GAMES.map(game => game.title)).toEqual(["Shell Shockers", "Drift Hunters", "Moto X3M", "ZombsRoyale.io", "Robbery Bob 2", "We Become What We Behold", "Poxel.io"]);
+    expect(HUB_GAMES.filter(game => game.mode === "external")).toHaveLength(5);
+    expect(HUB_GAMES.find(game => game.slug === "zombsroyale")?.sourceUrl).toBe("https://zombsroyale.io/");
   });
 });
