@@ -20,7 +20,10 @@ export const startLogin = () => {
   const nonce = crypto.randomUUID();
   const isHttps = window.location.protocol === "https:";
   const stateCookieName = isHttps ? OAUTH_STATE_COOKIE : OAUTH_STATE_COOKIE_FALLBACK;
-  const cookieAttributes = isHttps ? "; Path=/; Max-Age=600; SameSite=None; Secure" : "; Path=/; Max-Age=600; SameSite=Lax";
+  // The WebDev preview runs the app inside a management iframe. Partitioned
+  // cookies let that embedded context retain the one-time nonce without
+  // falling back to an unsafe state-only redirect.
+  const cookieAttributes = isHttps ? "; Path=/; Max-Age=600; SameSite=None; Secure; Partitioned" : "; Path=/; Max-Age=600; SameSite=Lax";
   document.cookie = `${stateCookieName}=${nonce}${cookieAttributes}`;
   const state = encodeOAuthState({ redirectUri, nonce });
 

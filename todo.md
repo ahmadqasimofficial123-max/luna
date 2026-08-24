@@ -147,3 +147,4 @@
 - [x] Add a Games sidebar section with separate Poxel, Friday Night Funkin’, and We Become What We Behold pages, responsive embedded players, fullscreen controls, and route/embed verification
 - [x] Create a dedicated Games hub page listing Shell Shockers, Drift Hunters, Moto X3M, ZombsRoyale, Robbery Bob 2, We Become What We Behold, and Poxel.io with responsive play/open actions
 - [x] Diagnose and repair the preview login failure showing `invalid oauth state`, preserving nonce-based CSRF validation and adding regression coverage
+- [x] Trace and repair the repeated preview callback `invalid oauth state` failure using the actual request origin/cookie/state behavior, then verify a fresh login attempt
