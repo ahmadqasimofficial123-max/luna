@@ -113,3 +113,15 @@ nav { display: grid; gap: 6px; }
   .messages-app-shell .messages-page { min-height: calc(100vh - 64px); }
   .messages-app-shell .messages-sidebar, .messages-app-shell .chat-panel { min-height: calc(100vh - 64px); }
 }
+
+/* Keep collapsed tablet sidebars icon-only; never leave profile text partially visible. */
+@media (min-width: 641px) and (max-width: 980px) {
+  .sidebar-profile-copy { display: none !important; }
+  .sidebar-profile { justify-content: center; padding-inline: 7px; }
+  .sidebar-profile > svg { display: none; }
+}
+@media (max-width: 640px) {
+  .sidebar:not(.sidebar-open) .sidebar-profile-copy { display: none; }
+  .sidebar:not(.sidebar-open) .sidebar-profile > svg { display: none; }
+  .sidebar-open .sidebar-profile-copy { display: flex; }
+}
